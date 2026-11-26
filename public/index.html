@@ -491,6 +491,24 @@ main {
   scroll-snap-align: start;
 }
 
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-card {
+  flex: 0 0 156px;
+  height: 72px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
 .account-card .acc-name {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -1137,7 +1155,11 @@ textarea {
       <span>Accounts</span>
       <button class="btn btn-secondary btn-sm" onclick="openAddAccountModal()">+ New</button>
     </div>
-    <div class="accounts-row" id="accounts-row"></div>
+    <div class="accounts-row" id="accounts-row">
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+      <div class="skeleton skeleton-card"></div>
+    </div>
 
     <div class="section-title" style="margin-top:20px">
       <span>This Month</span>
@@ -1538,8 +1560,8 @@ function toast(msg, type='success') {
   setTimeout(()=>el.remove(), 3200);
 }
 
-async function api(method, url, body) {
-  const opts = { method, headers: {'Content-Type':'application/json'}, credentials: 'include' };
+async function api(method, url, body, extraOpts = {}) {
+  const opts = { method, headers: {'Content-Type':'application/json'}, credentials: 'include', ...extraOpts };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(url, opts);
   if (r.status === 401 && !url.includes('/api/login') && !url.includes('/api/auth/status')) {
@@ -1550,10 +1572,10 @@ async function api(method, url, body) {
   if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
   return data;
 }
-const GET  = url => api('GET', url);
-const POST = (url, b) => api('POST', url, b);
-const PUT  = (url, b) => api('PUT', url, b);
-const DEL  = url => api('DELETE', url);
+const GET  = (url, opts) => api('GET', url, null, opts);
+const POST = (url, b, opts) => api('POST', url, b, opts);
+const PUT  = (url, b, opts) => api('PUT', url, b, opts);
+const DEL  = (url, opts) => api('DELETE', url, null, opts);
 
 function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -1677,13 +1699,29 @@ function setGaveTook(dir) {
   document.querySelectorAll('#gave-took-pills .pill').forEach(p => p.classList.toggle('active', p.dataset.dir === dir));
 }
 
+let peopleMap = new Map();
+
+function updatePeopleMap(people) {
+  allPeople = people;
+  peopleMap.clear();
+  for (const p of people) {
+    peopleMap.set(p.name.toLowerCase(), p);
+  }
+}
+
 function personACInput() {
   const q = document.getElementById('f-person-name').value.trim().toLowerCase();
   const dd = document.getElementById('person-ac-dropdown');
   if (!q) { dd.classList.remove('open'); return; }
-  const matches = allPeople.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+  const matches = [];
+  for (const p of allPeople) {
+    if (p.name.toLowerCase().includes(q)) {
+      matches.push(p);
+      if (matches.length >= 8) break;
+    }
+  }
   if (!matches.length && q) {
-    dd.innerHTML = `<div class="ac-item" onclick="selectPerson('${q}')">➕ Add "${esc(q)}"</div>`;
+    dd.innerHTML = `<div class="ac-item" onclick="selectPerson('${esc(q)}')">➕ Add "${esc(q)}"</div>`;
   } else {
     dd.innerHTML = matches.map(p => `<div class="ac-item" onclick="selectPerson('${esc(p.name)}')">${esc(p.name)}</div>`).join('');
   }
@@ -1798,7 +1836,7 @@ function editTransaction(tx) {
 async function loadPeople() {
   try {
     const people = await GET('/api/people');
-    allPeople = people;
+    updatePeopleMap(people);
     const active = people.filter(p => p.net_balance !== 0);
     const settled = people.filter(p => p.net_balance === 0);
 
@@ -1905,8 +1943,17 @@ async function submitSettle(e) {
   } catch(e) { toast(e.message,'error'); }
 }
 
+let txAbortController = null;
+
 async function loadTransactions(reset=false) {
-  if (reset) { txOffset = 0; txTotal = 0; document.getElementById('tx-list').innerHTML = ''; }
+  if (reset) {
+    if (txAbortController) txAbortController.abort();
+    txOffset = 0;
+    txTotal = 0;
+    document.getElementById('tx-list').innerHTML = '';
+  }
+  txAbortController = new AbortController();
+  const signal = txAbortController.signal;
   document.getElementById('tx-list').innerHTML += '<div class="loading-wrap" id="tx-spinner"><div class="spinner"></div></div>';
   try {
     const params = new URLSearchParams({ limit: txLimit, offset: txOffset });
@@ -1917,7 +1964,7 @@ async function loadTransactions(reset=false) {
     if (acc) params.set('account_id', acc);
     if (q) params.set('search', q);
 
-    const data = await GET(`/api/transactions?${params}`);
+    const data = await GET(`/api/transactions?${params}`, { signal });
     document.getElementById('tx-spinner')?.remove();
     txTotal = data.total;
     txOffset += data.transactions.length;
@@ -1932,6 +1979,7 @@ async function loadTransactions(reset=false) {
     const loadMoreBtn = document.getElementById('tx-load-more');
     loadMoreBtn.style.display = txOffset < txTotal ? '' : 'none';
   } catch(e) {
+    if (e.name === 'AbortError') return;
     document.getElementById('tx-spinner')?.remove();
     if (!e.message.includes('Unauthorized')) {
       toast('Failed to load transactions: ' + e.message, 'error');
@@ -2040,9 +2088,10 @@ function fmtDate(dt) {
 }
 
 async function initDashboard() {
-  await loadAccountDropdowns();
-  await loadSummary();
-  GET('/api/people').then(p => { allPeople = p; }).catch(()=>{});
+  await Promise.all([
+    loadSummary(),
+    GET('/api/people').then(p => { updatePeopleMap(p); }).catch(()=>{})
+  ]);
 }
 
 (async function init() {
