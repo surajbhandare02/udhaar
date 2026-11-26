@@ -349,8 +349,8 @@ button {
 }
 
 .header-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-sm);
   background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
@@ -364,6 +364,25 @@ button {
 .header-btn:hover {
   background: var(--border-subtle);
   color: var(--text-primary);
+}
+
+.header-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-icon {
+  display: inline-block;
+  line-height: 1;
+}
+
+.refresh-icon.spin {
+  animation: refresh-spin 0.65s linear infinite;
+}
+
+@keyframes refresh-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Main Layout ── */
@@ -1300,6 +1319,9 @@ main.app-shell {
         <span class="status-dot"></span>
         <span id="sync-label">Cloud Active</span>
       </div>
+      <button class="header-btn" id="refresh-page-btn" onclick="refreshPageData()" title="Refresh Page Data">
+        <span class="refresh-icon">🔄</span>
+      </button>
       <button class="header-btn" onclick="logout()" title="Lock Screen">🔒</button>
     </div>
   </div>
@@ -1373,6 +1395,9 @@ main.app-shell {
       </button>
       <button class="action-btn" onclick="openSMSModal()">
         <span>📱</span> Sync Notes / SMS
+      </button>
+      <button class="action-btn" onclick="refreshPageData()" title="Refresh Dashboard Data">
+        <span class="refresh-icon">🔄</span> Refresh
       </button>
     </div>
 
@@ -1833,6 +1858,32 @@ async function logout() {
   await POST('/api/logout', {});
   document.getElementById('pin-lock-screen').classList.remove('unlocked');
   clearPin();
+}
+
+/* ── Refresh Page Data ── */
+async function refreshPageData() {
+  const btn = document.getElementById('refresh-page-btn');
+  const icons = document.querySelectorAll('.refresh-icon');
+  icons.forEach(i => i.classList.add('spin'));
+  if (btn) btn.disabled = true;
+
+  try {
+    const promises = [loadSummary()];
+    if (currentTab === 'people') {
+      promises.push(loadPeople());
+    } else if (currentTab === 'transactions') {
+      promises.push(loadTransactions(true));
+    } else if (currentTab === 'add') {
+      promises.push(loadAccountDropdowns());
+    }
+    await Promise.all(promises);
+    toast('Data refreshed successfully');
+  } catch (err) {
+    toast('Refresh failed: ' + err.message, 'error');
+  } finally {
+    icons.forEach(i => i.classList.remove('spin'));
+    if (btn) btn.disabled = false;
+  }
 }
 
 /* ── Currency Formatter ── */
