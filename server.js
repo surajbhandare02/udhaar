@@ -63,7 +63,14 @@ const server = http.createServer(async (req, res) => {
     const safePath = path.join(PUBLIC_DIR, path.normalize(pathname).replace(/^(\.\.[/\\])+/, ''));
     if (fs.existsSync(safePath) && fs.statSync(safePath).isFile()) {
       const ext = path.extname(safePath);
-      const mime = ext === '.json' ? 'application/json' : ext === '.svg' ? 'image/svg+xml' : 'image/png';
+      const mimeMap = {
+        '.json': 'application/json',
+        '.svg': 'image/svg+xml',
+        '.png': 'image/png',
+        '.js': 'application/javascript',
+        '.css': 'text/css'
+      };
+      const mime = mimeMap[ext] || 'text/plain';
       res.writeHead(200, { 'Content-Type': mime });
       return fs.createReadStream(safePath).pipe(res);
     }
