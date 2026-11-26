@@ -15,7 +15,11 @@ export async function initDB() {
     `CREATE TABLE IF NOT EXISTS accounts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
-      balance REAL NOT NULL DEFAULT 0
+      balance REAL NOT NULL DEFAULT 0,
+      type TEXT DEFAULT 'bank',
+      credit_limit REAL DEFAULT 0,
+      statement_date INTEGER DEFAULT 15,
+      due_date INTEGER DEFAULT 5
     )`,
     `CREATE TABLE IF NOT EXISTS people (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,8 +51,61 @@ export async function initDB() {
       name TEXT NOT NULL,
       amount REAL NOT NULL,
       created_at TEXT DEFAULT (datetime('now', '+5 hours', '30 minutes'))
+    )`,
+    `CREATE TABLE IF NOT EXISTS budgets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      category TEXT NOT NULL,
+      period TEXT NOT NULL DEFAULT 'monthly',
+      amount REAL NOT NULL
+    )`,
+    `CREATE TABLE IF NOT EXISTS subscriptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      billing_cycle TEXT NOT NULL DEFAULT 'monthly',
+      next_renewal_date TEXT NOT NULL,
+      account_id INTEGER,
+      category TEXT DEFAULT 'Entertainment'
+    )`,
+    `CREATE TABLE IF NOT EXISTS recurring_bills (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      category TEXT DEFAULT 'Bills',
+      account_id INTEGER,
+      frequency TEXT DEFAULT 'monthly',
+      due_date TEXT NOT NULL,
+      last_paid_at TEXT
+    )`,
+    `CREATE TABLE IF NOT EXISTS savings_goals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      target_amount REAL NOT NULL,
+      current_amount REAL NOT NULL DEFAULT 0,
+      target_date TEXT,
+      account_id INTEGER
+    )`,
+    `CREATE TABLE IF NOT EXISTS templates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'expense',
+      amount REAL NOT NULL,
+      account_id INTEGER,
+      category TEXT,
+      note TEXT
     )`
   ], 'write');
+
+  // Safe migrations for existing accounts table
+  const colMigrations = [
+    `ALTER TABLE accounts ADD COLUMN type TEXT DEFAULT 'bank'`,
+    `ALTER TABLE accounts ADD COLUMN credit_limit REAL DEFAULT 0`,
+    `ALTER TABLE accounts ADD COLUMN statement_date INTEGER DEFAULT 15`,
+    `ALTER TABLE accounts ADD COLUMN due_date INTEGER DEFAULT 5`
+  ];
+  for (const sql of colMigrations) {
+    try { await db.execute(sql); } catch {}
+  }
 
   await db.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('monthly_budget', '25000')`);
   await db.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('saved_by_waiting', '0')`);
@@ -56,9 +113,19 @@ export async function initDB() {
   const accs = await db.execute('SELECT COUNT(*) as c FROM accounts');
   if (Number(accs.rows[0].c) === 0) {
     await db.batch([
-      { sql: 'INSERT INTO accounts (name, balance) VALUES (?, ?)', args: ['UPI / Bank', 0] },
-      { sql: 'INSERT INTO accounts (name, balance) VALUES (?, ?)', args: ['Cash', 0] },
-      { sql: 'INSERT INTO accounts (name, balance) VALUES (?, ?)', args: ['Savings', 0] }
+      { sql: 'INSERT INTO accounts (name, balance, type) VALUES (?, ?, ?)', args: ['UPI / Bank', 0, 'bank'] },
+      { sql: 'INSERT INTO accounts (name, balance, type) VALUES (?, ?, ?)', args: ['Cash', 0, 'cash'] },
+      { sql: 'INSERT INTO accounts (name, balance, type) VALUES (?, ?, ?)', args: ['Savings', 0, 'bank'] }
+    ], 'write');
+  }
+
+  // Seed default templates if empty
+  const tplCount = await db.execute('SELECT COUNT(*) as c FROM templates');
+  if (Number(tplCount.rows[0].c) === 0) {
+    await db.batch([
+      { sql: `INSERT INTO templates (name, type, amount, category, note) VALUES (?, 'expense', ?, ?, ?)`, args: ['Daily Chai / Coffee', 40, 'Food', 'Coffee & snacks'] },
+      { sql: `INSERT INTO templates (name, type, amount, category, note) VALUES (?, 'expense', ?, ?, ?)`, args: ['Metro / Auto Commute', 50, 'Travel', 'Daily transit'] },
+      { sql: `INSERT INTO templates (name, type, amount, category, note) VALUES (?, 'expense', ?, ?, ?)`, args: ['Grocery Restock', 500, 'Food', 'Weekly essentials'] }
     ], 'write');
   }
 }

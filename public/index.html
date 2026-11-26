@@ -14,11 +14,11 @@
 <link rel="icon" type="image/svg+xml" href="/icon.svg"/>
 <style>
 :root {
-  --bg: #f8fafc;
+  --bg: #f5f7fa;
   --card: #ffffff;
-  --card-subtle: #f1f5f9;
+  --card-subtle: #f1f4f9;
   --border: #e2e8f0;
-  --border-subtle: #f1f5f9;
+  --border-subtle: #edf2f7;
   --text: #0f172a;
   --text-secondary: #475569;
   --muted: #64748b;
@@ -31,7 +31,9 @@
   --red-bg: #fef2f2;
   --amber: #b45309;
   --amber-bg: #fffbeb;
-  --nav-bg: rgba(255, 255, 255, 0.88);
+  --purple: #7c3aed;
+  --purple-bg: #f5f3ff;
+  --nav-bg: rgba(255, 255, 255, 0.9);
   --sheet-bg: #ffffff;
   --backdrop: rgba(15, 23, 42, 0.45);
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
@@ -58,7 +60,9 @@
   --red-bg: rgba(248, 113, 113, 0.12);
   --amber: #fbbf24;
   --amber-bg: rgba(251, 191, 36, 0.12);
-  --nav-bg: rgba(19, 25, 38, 0.88);
+  --purple: #c084fc;
+  --purple-bg: rgba(192, 132, 252, 0.12);
+  --nav-bg: rgba(19, 25, 38, 0.9);
   --sheet-bg: #131926;
   --backdrop: rgba(0, 0, 0, 0.65);
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
@@ -66,15 +70,7 @@
   --shadow-sheet: 0 -8px 32px rgba(0,0,0,0.5);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: var(--font);
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Native iOS PWA Viewport Lock (prevents rubber-banding outer page) */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
 html, body {
   background: var(--bg);
   color: var(--text);
@@ -98,7 +94,7 @@ input, select, textarea {
 /* iOS Standalone Shell */
 .ios-shell {
   width: 100%;
-  max-width: 430px;
+  max-width: 480px;
   margin: 0 auto;
   height: 100%;
   display: flex;
@@ -107,7 +103,7 @@ input, select, textarea {
   background: var(--bg);
 }
 
-/* Pull to Refresh Indicator */
+/* Pull to Refresh */
 .ptr-wrap {
   width: 100%;
   height: 0px;
@@ -121,16 +117,11 @@ input, select, textarea {
   font-weight: 600;
   gap: 6px;
 }
-.ptr-icon {
-  display: inline-block;
-  transition: transform 0.2s ease;
-}
-.ptr-wrap.refreshing .ptr-icon {
-  animation: spin 0.8s linear infinite;
-}
+.ptr-icon { display: inline-block; transition: transform 0.2s ease; }
+.ptr-wrap.refreshing .ptr-icon { animation: spin 0.8s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* Momentum Scrolling Screen Content */
+/* Scrolling Content */
 .screen-content {
   flex: 1;
   padding: calc(env(safe-area-inset-top, 20px) + 8px) 16px calc(env(safe-area-inset-bottom, 20px) + 80px);
@@ -188,10 +179,7 @@ input, select, textarea {
 .header-actions { display: flex; gap: 8px; }
 
 /* Omni-Command Bar */
-.omni-box {
-  position: relative;
-  margin-bottom: 14px;
-}
+.omni-box { position: relative; margin-bottom: 10px; }
 .omni-input {
   width: 100%;
   height: 44px;
@@ -223,32 +211,58 @@ input, select, textarea {
   justify-content: center;
 }
 
+/* Template Chips */
+.tpl-ribbon {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  scrollbar-width: none;
+}
+.tpl-ribbon::-webkit-scrollbar { display: none; }
+.tpl-chip {
+  padding: 5px 10px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.tpl-chip:active { transform: scale(0.96); background: var(--card-subtle); }
+
 /* Balance Hero Card */
 .balance-card {
   background: linear-gradient(145deg, var(--card) 0%, var(--card-subtle) 100%);
   border: 1px solid var(--border);
   border-radius: 18px;
-  padding: 18px 16px;
+  padding: 16px;
   margin-bottom: 14px;
   box-shadow: var(--shadow-md);
   position: relative;
 }
-.balance-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.balance-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .balance-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .balance-toggle-btn { background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px; display: flex; }
 .balance-amount { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; line-height: 1.15; }
 .balance-sub { font-size: 11px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
 .stat-pill-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
-.stat-pill { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
-.stat-pill-label { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); }
-.stat-pill-val { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.stat-pill { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 6px 8px; text-align: center; }
+.stat-pill-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+.stat-pill-val { font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
 
 /* Horizontally Scrollable Accounts Ribbon */
 .ribbon-wrap {
@@ -262,7 +276,7 @@ input, select, textarea {
 }
 .ribbon-wrap::-webkit-scrollbar { display: none; }
 .account-tile {
-  min-width: 136px;
+  min-width: 142px;
   flex: 1;
   background: var(--card);
   border: 1px solid var(--border);
@@ -275,7 +289,23 @@ input, select, textarea {
 .account-tile.active-filter { border-color: var(--blue); background: var(--blue-bg); }
 .account-tile-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .account-tile-name { font-size: 11px; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 4px; }
-.account-tile-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.account-tile-val { font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Credit Card Card Special */
+.cc-card-item {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #334155;
+}
+[data-theme="light"] .cc-card-item {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+.cc-chip-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #94a3b8; }
+.cc-util-bar-bg { height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+.cc-util-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
 
 /* Section Header */
 .section-title-row {
@@ -285,7 +315,7 @@ input, select, textarea {
   margin-bottom: 10px;
   padding: 0 2px;
 }
-.section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .section-action { font-size: 12px; font-weight: 600; color: var(--blue); cursor: pointer; text-decoration: none; }
 
 /* Compact iOS Transaction Rows */
@@ -363,7 +393,7 @@ input, select, textarea {
 .month-btn:active { background: var(--card-subtle); color: var(--text); }
 .month-title { font-weight: 700; font-size: 13px; }
 
-/* Filter Chips (Horizontally Scrollable) */
+/* Filter Chips */
 .chip-row {
   display: flex;
   gap: 6px;
@@ -389,7 +419,7 @@ input, select, textarea {
 }
 .chip.active { background: var(--blue); color: #fff; border-color: var(--blue); }
 
-/* Analytics Visuals */
+/* Visual Bars */
 .chart-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -403,13 +433,8 @@ input, select, textarea {
 .cat-bar-bg { height: 6px; background: var(--card-subtle); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
 .cat-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; }
 
-/* Interactive Sparkline Chart (Home View) */
-.sparkline-svg {
-  width: 100%;
-  height: 54px;
-  overflow: visible;
-  margin-top: 6px;
-}
+/* Sparkline SVG */
+.sparkline-svg { width: 100%; height: 50px; overflow: visible; margin-top: 6px; }
 
 /* Fixed iOS Bottom Tab Bar */
 .bottom-nav {
@@ -427,7 +452,7 @@ input, select, textarea {
   align-items: center;
   justify-content: space-around;
   z-index: 100;
-  max-width: 430px;
+  max-width: 480px;
   margin: 0 auto;
 }
 .nav-tab {
@@ -490,7 +515,7 @@ input, select, textarea {
   left: 0;
   right: 0;
   bottom: 0;
-  max-width: 430px;
+  max-width: 480px;
   margin: 0 auto;
   background: var(--sheet-bg);
   border-top-left-radius: 24px;
@@ -522,7 +547,7 @@ input, select, textarea {
 .sheet-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; }
 .sheet-close-btn { background: var(--card-subtle); border: none; width: 32px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; }
 
-/* Forms inside Sheet */
+/* Tabs inside Sheet */
 .tabs { display: flex; background: var(--card-subtle); padding: 3px; border-radius: 10px; gap: 3px; margin-bottom: 14px; }
 .tab { flex: 1; min-height: 34px; font-size: 12px; border-radius: 8px; border: none; background: transparent; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--muted); }
 .tab.active { background: var(--card); color: var(--text); box-shadow: var(--shadow-sm); }
@@ -540,6 +565,21 @@ input, select {
   color: var(--text);
 }
 input:focus, select:focus { border-color: var(--blue); }
+
+/* Badges */
+.badge-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.badge-normal { background: var(--blue-bg); color: var(--blue); }
+.badge-warning { background: var(--amber-bg); color: var(--amber); }
+.badge-exceeded { background: var(--red-bg); color: var(--red); }
 
 /* PIN Screen */
 .pin-gate { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 300; padding: 20px; }
@@ -617,7 +657,10 @@ input:focus, select:focus { border-color: var(--blue); }
         <button type="button" class="omni-submit" onclick="runOmniCommand()" id="btn-omni-go"></button>
       </div>
 
-      <!-- Main Balance Hero Card (Safe to Spend Engine) -->
+      <!-- Quick Template Chips -->
+      <div class="tpl-ribbon" id="home-templates-ribbon"></div>
+
+      <!-- Main Balance Hero Card (Safe to Spend & Net Worth) -->
       <div class="balance-card">
         <div class="balance-header">
           <span class="balance-label"><span id="ico-safe-shield"></span> Safe to Spend</span>
@@ -628,24 +671,31 @@ input:focus, select:focus { border-color: var(--blue); }
 
         <div class="stat-pill-row">
           <div class="stat-pill">
-            <div class="stat-pill-label">Month Spent</div>
+            <div class="stat-pill-label">Net Worth</div>
+            <div class="stat-pill-val" style="color:var(--blue)" id="val-home-networth">₹0.00</div>
+          </div>
+          <div class="stat-pill">
+            <div class="stat-pill-label">Spent (Mo)</div>
             <div class="stat-pill-val" style="color:var(--red)" id="val-home-spent">₹0.00</div>
           </div>
           <div class="stat-pill">
-            <div class="stat-pill-label">Udhaar Net</div>
-            <div class="stat-pill-val" id="val-home-udhaar">₹0.00</div>
+            <div class="stat-pill-label">Income (Mo)</div>
+            <div class="stat-pill-val" style="color:var(--green)" id="val-home-income">₹0.00</div>
           </div>
         </div>
       </div>
 
-      <!-- Quick Accounts Ribbon -->
+      <!-- Accounts & Cards Ribbon -->
       <div class="section-title-row">
-        <span class="section-title"><span id="ico-ribbon-wallet"></span> Accounts</span>
-        <span class="section-action" onclick="switchTab('budgets')">Manage</span>
+        <span class="section-title"><span id="ico-ribbon-wallet"></span> Accounts & Cards</span>
+        <span class="section-action" onclick="openAddAccountModal()">+ New</span>
       </div>
       <div class="ribbon-wrap" id="accounts-ribbon"></div>
 
-      <!-- Spending Velocity & Interactive Trend Card -->
+      <!-- Credit Cards Alert / Utilization Card (if credit cards exist) -->
+      <div id="credit-cards-container"></div>
+
+      <!-- Spending Velocity & Trend Card -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
           <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase">Spending Velocity</span>
@@ -655,9 +705,11 @@ input:focus, select:focus { border-color: var(--blue); }
         <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden;margin-bottom:8px">
           <div id="home-budget-bar" style="height:100%;width:0%;background:var(--blue);transition:width 0.3s"></div>
         </div>
-        <!-- Interactive Sparkline SVG -->
         <div id="home-sparkline-wrap"></div>
       </div>
+
+      <!-- Upcoming Bills & Subscriptions Alert -->
+      <div id="home-upcoming-container"></div>
 
       <!-- Recent Transactions Preview -->
       <div class="section-title-row" style="margin-top:14px">
@@ -671,7 +723,6 @@ input:focus, select:focus { border-color: var(--blue); }
     <!-- VIEW 2: TRANSACTIONS (SEARCH & HISTORY)       -->
     <!-- ============================================== -->
     <div id="view-tx" class="view-section">
-      <!-- Month Navigation Switcher -->
       <div class="month-bar">
         <button class="month-btn" onclick="changeMonth(-1)" id="btn-prev-month"></button>
         <div class="month-title" id="display-month">Current Month</div>
@@ -742,35 +793,49 @@ input:focus, select:focus { border-color: var(--blue); }
         <div id="analytics-cat-list"></div>
       </div>
 
-      <!-- Velocity & Health Card -->
-      <div class="chart-card">
+      <!-- Credit Card Utilization Analytics -->
+      <div class="chart-card" id="analytics-cc-section">
         <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px">
-          Monthly Pacing Analysis
+          Credit Utilization Health
         </div>
-        <div style="font-size:13px;color:var(--text);margin-bottom:4px" id="analytics-pacing-text">Pacing: On track</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.4" id="analytics-pacing-sub">Calculating spend velocity vs monthly budget...</div>
+        <div id="analytics-cc-list"></div>
       </div>
     </div>
 
     <!-- ============================================== -->
-    <!-- VIEW 4: BUDGETS & UDHAAR                      -->
+    <!-- VIEW 4: BUDGETS, SUBS & RECURRING BILLS       -->
     <!-- ============================================== -->
     <div id="view-budgets" class="view-section">
-      <!-- Monthly Budget Controller -->
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase">Monthly Budget</span>
-          <button class="btn btn-sm" onclick="editBudgetPrompt()">Set Budget</button>
-        </div>
-        <div style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums" id="budget-view-spent">₹0.00</div>
-        <div style="font-size:11px;color:var(--muted);margin-bottom:8px" id="budget-view-target">Limit: ₹25,000</div>
-        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden">
-          <div id="budget-view-bar" style="height:100%;width:0%;background:var(--blue)"></div>
-        </div>
+      <!-- Smart Category Budgets Section -->
+      <div class="section-title-row">
+        <span class="section-title"><span id="ico-budgets-title"></span> Smart Category Budgets</span>
+        <span class="section-action" onclick="openAddBudgetModal()">+ Add Budget</span>
       </div>
+      <div id="smart-budgets-list"></div>
+
+      <!-- Subscriptions Section -->
+      <div class="section-title-row" style="margin-top:16px">
+        <span class="section-title"><span id="ico-subs-title"></span> Subscriptions (<span id="subs-monthly-sum">₹0/mo</span>)</span>
+        <span class="section-action" onclick="openAddSubModal()">+ Add Sub</span>
+      </div>
+      <div id="subscriptions-list"></div>
+
+      <!-- Recurring Bills Section -->
+      <div class="section-title-row" style="margin-top:16px">
+        <span class="section-title"><span id="ico-bills-title"></span> Recurring Scheduled Bills</span>
+        <span class="section-action" onclick="openAddBillModal()">+ Add Bill</span>
+      </div>
+      <div id="recurring-bills-list"></div>
+
+      <!-- Savings Goals Section -->
+      <div class="section-title-row" style="margin-top:16px">
+        <span class="section-title"><span id="ico-goals-title"></span> Savings Goals</span>
+        <span class="section-action" onclick="openAddGoalModal()">+ Add Goal</span>
+      </div>
+      <div id="savings-goals-list"></div>
 
       <!-- Pause Vault (24h Cooldown Strip) -->
-      <div class="card">
+      <div class="card" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="togglePauseVault()">
           <span style="font-weight:700;display:flex;align-items:center;gap:6px">
             <span id="ico-vault-clock"></span> 24h Pause Vault
@@ -789,8 +854,8 @@ input:focus, select:focus { border-color: var(--blue); }
       </div>
 
       <!-- Pending Udhaar Customer Ledger -->
-      <div class="section-title-row">
-        <span class="section-title"><span id="ico-udhaar-users"></span> Pending Udhaar Ledger</span>
+      <div class="section-title-row" style="margin-top:16px">
+        <span class="section-title"><span id="ico-udhaar-users"></span> People / Udhaar Ledger</span>
         <span style="font-size:12px;color:var(--muted)" id="udhaar-pending-count">0 pending</span>
       </div>
       <div class="card" id="udhaar-people-container" style="padding:4px 14px"></div>
@@ -809,7 +874,7 @@ input:focus, select:focus { border-color: var(--blue); }
       </div>
 
       <div class="card">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px">App Preferences</div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Preferences & Data</div>
         
         <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
           <div>
@@ -825,6 +890,14 @@ input:focus, select:focus { border-color: var(--blue); }
             <div style="font-size:11px;color:var(--muted)">Import bank debits & credits</div>
           </div>
           <button class="btn btn-sm" onclick="syncNotesPrompt()">Import</button>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-subtle)">
+          <div>
+            <div style="font-weight:600">Export Backup</div>
+            <div style="font-size:11px;color:var(--muted)">Download complete financial JSON</div>
+          </div>
+          <button class="btn btn-sm" onclick="exportDataBackup()">Export</button>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
@@ -934,11 +1007,11 @@ input:focus, select:focus { border-color: var(--blue); }
     <!-- Account Selectors -->
     <div style="display:flex;gap:8px">
       <div class="field" style="flex:1">
-        <label>Account</label>
+        <label>Account / Card</label>
         <select id="f-acc"></select>
       </div>
       <div class="field" id="to-acc-field" style="flex:1;display:none">
-        <label>To Account</label>
+        <label>To Account / Card</label>
         <select id="f-to-acc"></select>
       </div>
     </div>
@@ -981,17 +1054,32 @@ input:focus, select:focus { border-color: var(--blue); }
   <div id="detail-sheet-body"></div>
 </div>
 
+<!-- ============================================== -->
+<!-- BOTTOM SHEET 3: GENERIC MODAL (BUDGET/SUB/ETC)-->
+<!-- ============================================== -->
+<div class="sheet-overlay" id="generic-sheet-overlay" onclick="closeGenericSheet()"></div>
+<div class="bottom-sheet" id="generic-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title" id="generic-sheet-title">Modal Title</span>
+    <button class="sheet-close-btn" onclick="closeGenericSheet()" id="btn-close-generic-sheet"></button>
+  </div>
+  <div id="generic-sheet-body"></div>
+</div>
+
 <script>
 // ── Vector Icon Engine (Strictly Lucide Clean SVG, No Emojis) ──
 const ICONS = {
   home: '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   receipt: '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h4"/></svg>',
   'pie-chart': '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>',
+  target: '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
   users: '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   user: '<svg class="svg-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   plus: '<svg class="svg-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
   landmark: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="22" x2="22" y2="22"/><line x1="12" y1="2" x2="20" y2="7"/><line x1="12" y1="2" x2="4" y2="7"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="6" y1="7" x2="6" y2="18"/><line x1="10" y1="7" x2="10" y2="18"/><line x1="14" y1="7" x2="14" y2="18"/><line x1="18" y1="7" x2="18" y2="18"/><polygon points="2 7 12 2 22 7"/></svg>',
   wallet: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
+  'credit-card': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>',
   'arrow-up-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
   'arrow-down-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>',
   repeat: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
@@ -1022,7 +1110,7 @@ const ICONS = {
 
 const icon = name => ICONS[name] || '';
 
-// Inject Initial Icons
+// Inject Initial Static Icons
 document.getElementById('pin-lock-icon').innerHTML = icon('lock');
 document.getElementById('ptr-icon').innerHTML = icon('refresh');
 document.getElementById('btn-refresh').innerHTML = icon('refresh');
@@ -1038,16 +1126,21 @@ document.getElementById('btn-fab-add').innerHTML = icon('plus');
 document.getElementById('nav-ico-home').innerHTML = icon('home');
 document.getElementById('nav-ico-tx').innerHTML = icon('receipt');
 document.getElementById('nav-ico-analytics').innerHTML = icon('pie-chart');
-document.getElementById('nav-ico-budgets').innerHTML = icon('users');
+document.getElementById('nav-ico-budgets').innerHTML = icon('target');
 document.getElementById('nav-ico-profile').innerHTML = icon('user');
 document.getElementById('btn-prev-month').innerHTML = icon('chevron-left');
 document.getElementById('btn-next-month').innerHTML = icon('chevron-right');
 document.getElementById('ico-search-tx').innerHTML = icon('search');
 document.getElementById('ico-analytics-head').innerHTML = icon('pie-chart');
+document.getElementById('ico-budgets-title').innerHTML = icon('target');
+document.getElementById('ico-subs-title').innerHTML = icon('repeat');
+document.getElementById('ico-bills-title').innerHTML = icon('receipt');
+document.getElementById('ico-goals-title').innerHTML = icon('shield');
 document.getElementById('ico-vault-clock').innerHTML = icon('clock');
 document.getElementById('ico-udhaar-users').innerHTML = icon('users');
 document.getElementById('btn-close-add-sheet').innerHTML = icon('x');
 document.getElementById('btn-close-detail-sheet').innerHTML = icon('x');
+document.getElementById('btn-close-generic-sheet').innerHTML = icon('x');
 document.getElementById('tab-ico-exp').innerHTML = icon('arrow-up-right');
 document.getElementById('tab-ico-inc').innerHTML = icon('arrow-down-left');
 document.getElementById('tab-ico-udhaar').innerHTML = icon('repeat');
@@ -1066,7 +1159,24 @@ function haptic(type = 'light') {
 }
 
 // ── State Management ──
-let state = { accounts: [], people: [], monthlyExpense: 0, monthlyBudget: 25000, pausedItems: [], savedByWaiting: 0, currentMonth: '', transactions: [] };
+let state = {
+  accounts: [],
+  netWorth: 0,
+  people: [],
+  monthlyExpense: 0,
+  monthlyIncome: 0,
+  monthlyBudget: 25000,
+  budgets: [],
+  subscriptions: [],
+  totalMonthlySubscriptions: 0,
+  recurringBills: [],
+  savingsGoals: [],
+  templates: [],
+  pausedItems: [],
+  savedByWaiting: 0,
+  currentMonth: '',
+  transactions: []
+};
 let activeTab = 'home';
 let activeType = 'expense';
 let selectedMonth = new Date().toISOString().slice(0, 7);
@@ -1077,7 +1187,6 @@ let hideBalance = localStorage.getItem('hideBalance') === 'true';
 const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const mask = str => hideBalance ? '••••••' : str;
 
-// Dynamic Greeting based on iOS hour
 function updateGreeting() {
   const hr = new Date().getHours();
   const greeting = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
@@ -1086,7 +1195,6 @@ function updateGreeting() {
 }
 updateGreeting();
 
-// Toast helper
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -1105,7 +1213,7 @@ function initTheme() {
 
 function applyTheme(isDark) {
   document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  document.getElementById('meta-theme-color').setAttribute('content', isDark ? '#090d16' : '#f8fafc');
+  document.getElementById('meta-theme-color').setAttribute('content', isDark ? '#090d16' : '#f5f7fa');
   const ico = isDark ? icon('sun') : icon('moon');
   document.getElementById('btn-theme').innerHTML = ico;
   document.getElementById('btn-theme-label').innerHTML = `${ico} ${isDark ? 'Dark' : 'Light'}`;
@@ -1136,7 +1244,7 @@ function switchTab(tabName) {
   document.getElementById('scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Balance Mask Toggle ──
+// ── Privacy Mask Toggle ──
 function toggleBalanceVisibility() {
   haptic('light');
   hideBalance = !hideBalance;
@@ -1173,6 +1281,19 @@ function openAddSheet() {
 function closeAddSheet() {
   document.getElementById('add-sheet-overlay').classList.remove('open');
   document.getElementById('add-sheet').classList.remove('open');
+}
+
+function openGenericSheet(title, html) {
+  haptic('light');
+  document.getElementById('generic-sheet-title').textContent = title;
+  document.getElementById('generic-sheet-body').innerHTML = html;
+  document.getElementById('generic-sheet-overlay').classList.add('open');
+  document.getElementById('generic-sheet').classList.add('open');
+}
+
+function closeGenericSheet() {
+  document.getElementById('generic-sheet-overlay').classList.remove('open');
+  document.getElementById('generic-sheet').classList.remove('open');
 }
 
 function setType(t) {
@@ -1255,6 +1376,30 @@ function setTxFilterType(type, btn) {
   document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
   if (btn) btn.classList.add('active');
   renderTxList();
+}
+
+// ── Quick Templates ──
+async function applyTemplate(id) {
+  const tpl = (state.templates || []).find(t => t.id === id);
+  if (!tpl) return;
+  haptic('medium');
+  const defAcc = tpl.account_id || (state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0])?.id || 1;
+  const res = await fetch('/api/transactions', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      type: tpl.type || 'expense',
+      amount: tpl.amount,
+      account_id: defAcc,
+      category: tpl.category || 'General',
+      merchant: tpl.name,
+      note: tpl.note || tpl.name
+    })
+  });
+  if (res.ok) {
+    showToast(`Logged ₹${tpl.amount} (${tpl.name})`);
+    haptic('success');
+    refresh();
+  }
 }
 
 // ── Omni-Command Input Parser ──
@@ -1462,7 +1607,7 @@ function initPullToRefresh() {
 }
 initPullToRefresh();
 
-// ── Refresh & State Synchronization ──
+// ── State Synchronization ──
 async function refresh() {
   updateMonthDisplay();
   try {
@@ -1485,69 +1630,141 @@ async function refresh() {
 
     document.getElementById('val-safe-spend').textContent = mask(fmt(safeToSpend));
     document.getElementById('safe-spend-breakdown').textContent = `Liquid ${mask(fmt(liquid))} − Owed to others ${mask(fmt(owedToOthers))}`;
-    document.getElementById('val-home-spent').textContent = mask(fmt(state.monthlyExpense));
-
-    // Udhaar Net
-    const udhaarNet = (state.people || []).reduce((s, p) => s + (p.net_balance || 0), 0);
-    const uHomeEl = document.getElementById('val-home-udhaar');
-    uHomeEl.textContent = (udhaarNet >= 0 ? '+ ' : '') + mask(fmt(udhaarNet));
-    uHomeEl.style.color = udhaarNet >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('val-home-networth').textContent = mask(fmt(state.netWorth || 0));
+    document.getElementById('val-home-spent').textContent = mask(fmt(state.monthlyExpense || 0));
+    document.getElementById('val-home-income').textContent = mask(fmt(state.monthlyIncome || 0));
 
     // 2. Spending Velocity
     const budget = Number(state.monthlyBudget || 25000);
     document.getElementById('home-budget-target').textContent = `Target: ${mask(fmt(budget))}`;
-    document.getElementById('budget-view-target').textContent = `Monthly Limit: ${mask(fmt(budget))}`;
-    document.getElementById('budget-view-spent').textContent = mask(fmt(state.monthlyExpense));
-
     const [y, m] = selectedMonth.split('-').map(Number);
     const daysInMonth = new Date(y, m, 0).getDate();
     const today = new Date();
     const isCurrentMonth = selectedMonth === today.toISOString().slice(0, 7);
     const dayCount = isCurrentMonth ? Math.max(1, today.getDate()) : daysInMonth;
 
-    const dailyAvg = state.monthlyExpense / dayCount;
+    const dailyAvg = (state.monthlyExpense || 0) / dayCount;
     const projected = isCurrentMonth ? (dailyAvg * daysInMonth) : state.monthlyExpense;
     document.getElementById('home-velocity-readout').textContent = `₹${Math.round(dailyAvg).toLocaleString('en-IN')}/day avg · Projected ₹${Math.round(projected).toLocaleString('en-IN')}`;
 
-    const pct = budget > 0 ? Math.min(100, Math.round((state.monthlyExpense / budget) * 100)) : 0;
+    const pct = budget > 0 ? Math.min(100, Math.round(((state.monthlyExpense || 0) / budget) * 100)) : 0;
     const hBar = document.getElementById('home-budget-bar');
-    const bBar = document.getElementById('budget-view-bar');
     hBar.style.width = pct + '%';
-    bBar.style.width = pct + '%';
-    const barColor = pct > 100 ? 'var(--red)' : pct >= 80 ? 'var(--amber)' : 'var(--blue)';
-    hBar.style.background = barColor;
-    bBar.style.background = barColor;
+    hBar.style.background = pct > 100 ? 'var(--red)' : pct >= 80 ? 'var(--amber)' : 'var(--blue)';
 
     // Render Home Interactive Sparkline
     renderSparkline();
 
-    // 3. Accounts Ribbon
+    // 3. Template Chips (Home View)
+    document.getElementById('home-templates-ribbon').innerHTML = (state.templates || []).map(t => `
+      <div class="tpl-chip" onclick="applyTemplate(${t.id})">
+        ${icon('zap')} ${t.name} <span style="font-weight:700">${fmt(t.amount)}</span>
+      </div>
+    `).join('');
+
+    // 4. Accounts Ribbon
     document.getElementById('accounts-ribbon').innerHTML = state.accounts.map(a => {
-      const isBank = /upi|bank/i.test(a.name);
-      const isCash = /cash/i.test(a.name);
-      const icoName = isBank ? 'landmark' : isCash ? 'wallet' : 'repeat';
+      const isCC = a.type === 'credit_card';
+      const isCash = a.type === 'cash';
+      const icoName = isCC ? 'credit-card' : isCash ? 'wallet' : 'landmark';
       return `<div class="account-tile ${activeFilter && activeFilter.id === a.id ? 'active-filter' : ''}" data-id="${a.id}" onclick="handleAccountFilter(${a.id}, '${a.name}')">
         <div class="account-tile-head">
           <span class="account-tile-name">${icon(icoName)} ${a.name}</span>
-          <button class="month-btn" style="padding:0;min-height:24px;min-width:24px" title="Adjust Balance" onclick="event.stopPropagation();editAccount(${a.id})">${icon('sliders')}</button>
+          <button class="month-btn" style="padding:0;min-height:24px;min-width:24px" title="Edit" onclick="event.stopPropagation();editAccount(${a.id})">${icon('sliders')}</button>
         </div>
-        <div class="account-tile-val">${mask(fmt(a.balance))}</div>
+        <div class="account-tile-val">${isCC ? 'Debt: ' : ''}${mask(fmt(a.balance))}</div>
       </div>`;
     }).join('');
 
-    // 4. Form Selects
-    const optHtml = state.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+    // 5. Credit Cards Card Overview (Home View)
+    const creditCards = state.accounts.filter(a => a.type === 'credit_card');
+    const ccWrap = document.getElementById('credit-cards-container');
+    if (creditCards.length) {
+      ccWrap.innerHTML = `
+        <div class="section-title-row">
+          <span class="section-title"><span id="ico-home-cc"></span> Credit Cards</span>
+          <span class="section-action" onclick="switchTab('analytics')">Utilization</span>
+        </div>
+        ${creditCards.map(c => `
+          <div class="cc-card-item">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="cc-chip-logo">${c.name}</span>
+              <span style="font-size:11px;color:#cbd5e1">Due: ${c.due_date}th of month</span>
+            </div>
+            <div style="font-size:20px;font-weight:800;margin:6px 0;font-variant-numeric:tabular-nums">${mask(fmt(c.balance))} <span style="font-size:12px;font-weight:500;color:#94a3b8">/ ${mask(fmt(c.credit_limit))}</span></div>
+            <div class="cc-util-bar-bg">
+              <div class="cc-util-bar-fill" style="width:${c.utilization_pct}%;background:${c.utilization_pct > 80 ? 'var(--red)' : c.utilization_pct >= 40 ? 'var(--amber)' : 'var(--blue)'}"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#94a3b8">
+              <span>Utilized: ${c.utilization_pct}%</span>
+              <span>Available: ${mask(fmt(c.available_credit))}</span>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    } else {
+      ccWrap.innerHTML = '';
+    }
+
+    // 6. Upcoming Bills & Subscriptions Alert (Home View)
+    const upcomingBills = (state.recurringBills || []).slice(0, 2);
+    const upcomingSubs = (state.subscriptions || []).filter(s => s.isUpcoming).slice(0, 2);
+    const upWrap = document.getElementById('home-upcoming-container');
+    if (upcomingBills.length || upcomingSubs.length) {
+      upWrap.innerHTML = `
+        <div class="section-title-row" style="margin-top:10px">
+          <span class="section-title">${icon('clock')} Upcoming Reminders</span>
+          <span class="section-action" onclick="switchTab('budgets')">All</span>
+        </div>
+        <div class="card" style="padding:4px 14px">
+          ${upcomingBills.map(b => `
+            <div class="tx-row" onclick="payBill(${b.id})">
+              <div class="tx-left">
+                <div class="tx-icon-wrap">${icon('receipt')}</div>
+                <div class="tx-info">
+                  <div class="tx-title">${b.name}</div>
+                  <div class="tx-meta">Due ${b.due_date} · Tap to pay</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-amount debit">${mask(fmt(b.amount))}</div>
+              </div>
+            </div>
+          `).join('')}
+          ${upcomingSubs.map(s => `
+            <div class="tx-row">
+              <div class="tx-left">
+                <div class="tx-icon-wrap">${icon('repeat')}</div>
+                <div class="tx-info">
+                  <div class="tx-title">${s.name}</div>
+                  <div class="tx-meta" style="color:var(--amber);font-weight:600">Renews in ${s.daysUntilRenewal} days</div>
+                </div>
+              </div>
+              <div class="tx-right">
+                <div class="tx-amount debit">${mask(fmt(s.amount))}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    } else {
+      upWrap.innerHTML = '';
+    }
+
+    // 7. Form Selects
+    const optHtml = state.accounts.map(a => `<option value="${a.id}">${a.name} (${a.type === 'credit_card' ? 'Credit Card' : a.type})</option>`).join('');
     document.getElementById('f-acc').innerHTML = optHtml;
     document.getElementById('f-to-acc').innerHTML = optHtml;
     if (state.accounts[1]) document.getElementById('f-to-acc').value = state.accounts[1].id;
     document.getElementById('people-datalist').innerHTML = (state.people || []).map(p => `<option value="${p.name}"/>`).join('');
 
-    // 5. Profile metrics
+    // 8. Profile metrics
     document.getElementById('profile-saved-amt').textContent = fmt(state.savedByWaiting || 0);
 
-    // 6. Sub-views rendering
+    // 9. Sub-views rendering
     renderHomeRecent();
     renderTxList();
+    renderBudgetsAndSubscriptions();
     renderUdhaarLedger();
     renderPauseVault();
     if (activeTab === 'analytics') renderAnalytics();
@@ -1578,7 +1795,7 @@ function renderSparkline() {
 
   container.innerHTML = `
     <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:6px;display:flex;justify-content:space-between">
-      <span>Recent Spend Trend</span>
+      <span>Spend Velocity Trend</span>
       <span>Peak: ${mask(fmt(maxVal))}</span>
     </div>
     <svg class="sparkline-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
@@ -1684,7 +1901,408 @@ function closeDetailSheet() {
   document.getElementById('detail-sheet').classList.remove('open');
 }
 
-// ── Budgets & Udhaar Screen ──
+// ── Budgets, Subscriptions & Recurring Bills Screen ──
+function renderBudgetsAndSubscriptions() {
+  // 1. Smart Category Budgets
+  const bList = document.getElementById('smart-budgets-list');
+  const budgets = state.budgets || [];
+  if (!budgets.length) {
+    bList.innerHTML = '<div class="card" style="font-size:12px;color:var(--muted);text-align:center">No category budgets yet. Tap "+ Add Budget" above.</div>';
+  } else {
+    bList.innerHTML = budgets.map(b => {
+      const badgeClass = b.status === 'exceeded' ? 'badge-exceeded' : b.status === 'warning' ? 'badge-warning' : 'badge-normal';
+      const badgeText = b.status === 'exceeded' ? 'Exceeded' : b.status === 'warning' ? 'Warning 80%' : 'Safe';
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div>
+            <strong style="font-size:14px">${b.category}</strong>
+            <span style="font-size:11px;color:var(--muted)">(${b.period})</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="badge-tag ${badgeClass}">${badgeText}</span>
+            <button class="month-btn" style="padding:0;min-height:24px;min-width:24px" onclick="delBudget(${b.id})">${icon('trash-2')}</button>
+          </div>
+        </div>
+        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden;margin:6px 0">
+          <div style="height:100%;width:${Math.min(100, b.percentage)}%;background:${b.status === 'exceeded' ? 'var(--red)' : b.status === 'warning' ? 'var(--amber)' : 'var(--blue)'}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums">
+          <span>Spent: ${mask(fmt(b.spent))} of ${mask(fmt(b.amount))}</span>
+          <span style="font-weight:700;color:${b.residual >= 0 ? 'var(--text)' : 'var(--red)'}">${b.residual >= 0 ? mask(fmt(b.residual)) + ' left' : mask(fmt(Math.abs(b.residual))) + ' over'}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // 2. Subscriptions
+  const sList = document.getElementById('subscriptions-list');
+  const subs = state.subscriptions || [];
+  document.getElementById('subs-monthly-sum').textContent = mask(fmt(state.totalMonthlySubscriptions || 0)) + '/mo';
+  if (!subs.length) {
+    sList.innerHTML = '<div class="card" style="font-size:12px;color:var(--muted);text-align:center">No active subscriptions. Tap "+ Add Sub" to track.</div>';
+  } else {
+    sList.innerHTML = subs.map(s => `
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;font-size:13px">${s.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.billing_cycle} · ~${mask(fmt(s.monthlyCost))}/mo · Next: ${s.next_renewal_date}</div>
+          ${s.isUpcoming ? `<span class="badge-tag badge-warning" style="margin-top:4px">Renews in ${s.daysUntilRenewal} days</span>` : ''}
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800;font-variant-numeric:tabular-nums;font-size:14px">${mask(fmt(s.amount))}</div>
+          <button class="month-btn" style="padding:0;min-height:24px;min-width:24px;margin-left:auto;margin-top:4px" onclick="delSub(${s.id})">${icon('trash-2')}</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 3. Recurring Scheduled Bills
+  const bContainer = document.getElementById('recurring-bills-list');
+  const bills = state.recurringBills || [];
+  if (!bills.length) {
+    bContainer.innerHTML = '<div class="card" style="font-size:12px;color:var(--muted);text-align:center">No recurring bills added. Tap "+ Add Bill".</div>';
+  } else {
+    bContainer.innerHTML = bills.map(b => `
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700;font-size:13px">${b.name}</div>
+          <div style="font-size:11px;color:var(--muted)">Due: ${b.due_date} · ${b.frequency}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="font-weight:800;font-variant-numeric:tabular-nums;font-size:13px;margin-right:4px">${mask(fmt(b.amount))}</div>
+          <button class="btn btn-sm btn-primary" onclick="payBill(${b.id})">Mark Paid</button>
+          <button class="month-btn" style="padding:0;min-height:24px;min-width:24px" onclick="delBill(${b.id})">${icon('trash-2')}</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // 4. Savings Goals
+  const gContainer = document.getElementById('savings-goals-list');
+  const goals = state.savingsGoals || [];
+  if (!goals.length) {
+    gContainer.innerHTML = '<div class="card" style="font-size:12px;color:var(--muted);text-align:center">No savings goals created. Tap "+ Add Goal".</div>';
+  } else {
+    gContainer.innerHTML = goals.map(g => `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div>
+            <div style="font-weight:700;font-size:13px">${g.name}</div>
+            <div style="font-size:11px;color:var(--muted)">Target: ${g.target_date || 'No deadline'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="btn btn-sm" onclick="depositGoalPrompt(${g.id})">+ Deposit</button>
+            <button class="month-btn" style="padding:0;min-height:24px;min-width:24px" onclick="delGoal(${g.id})">${icon('trash-2')}</button>
+          </div>
+        </div>
+        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden;margin:6px 0">
+          <div style="height:100%;width:${g.percentage}%;background:var(--green)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums">
+          <span>Saved: ${mask(fmt(g.current_amount))} of ${mask(fmt(g.target_amount))}</span>
+          <span style="font-weight:700">${g.percentage}%</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+// ── Modals for Adding Features ──
+function openAddAccountModal() {
+  openGenericSheet('Add Account or Credit Card', `
+    <form onsubmit="submitNewAccount(event)">
+      <div class="field">
+        <label>Account Name *</label>
+        <input type="text" id="m-acc-name" placeholder="e.g. HDFC Regalia or ICICI Bank" required/>
+      </div>
+      <div class="field">
+        <label>Account Type</label>
+        <select id="m-acc-type" onchange="toggleCromFields()">
+          <option value="bank">UPI / Bank Account</option>
+          <option value="cash">Cash in Hand</option>
+          <option value="credit_card">Credit Card</option>
+          <option value="prepaid">Prepaid Wallet</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Initial Balance (or Utilized Debt) (₹)</label>
+        <input type="number" id="m-acc-bal" step="0.01" inputmode="decimal" placeholder="0.00"/>
+      </div>
+      <div id="m-cc-fields" style="display:none">
+        <div class="field">
+          <label>Credit Limit (₹) *</label>
+          <input type="number" id="m-acc-limit" step="0.01" inputmode="decimal" placeholder="e.g. 100000"/>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div class="field" style="flex:1">
+            <label>Statement Day (1-31)</label>
+            <input type="number" id="m-acc-stmt" min="1" max="31" value="15"/>
+          </div>
+          <div class="field" style="flex:1">
+            <label>Due Day (1-31)</label>
+            <input type="number" id="m-acc-due" min="1" max="31" value="5"/>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Account</button>
+    </form>
+  `);
+}
+
+function toggleCromFields() {
+  const isCC = document.getElementById('m-acc-type').value === 'credit_card';
+  document.getElementById('m-cc-fields').style.display = isCC ? 'block' : 'none';
+}
+
+async function submitNewAccount(e) {
+  e.preventDefault();
+  const name = document.getElementById('m-acc-name').value.trim();
+  const type = document.getElementById('m-acc-type').value;
+  const balance = parseFloat(document.getElementById('m-acc-bal').value) || 0;
+  const credit_limit = parseFloat(document.getElementById('m-acc-limit')?.value) || 0;
+  const statement_date = parseInt(document.getElementById('m-acc-stmt')?.value) || 15;
+  const due_date = parseInt(document.getElementById('m-acc-due')?.value) || 5;
+
+  const res = await fetch('/api/accounts', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, type, balance, credit_limit, statement_date, due_date })
+  });
+  if (res.ok) {
+    closeGenericSheet();
+    showToast(`Added account ${name}`);
+    refresh();
+  }
+}
+
+function openAddBudgetModal() {
+  openGenericSheet('Create Category Budget', `
+    <form onsubmit="submitNewBudget(event)">
+      <div class="field">
+        <label>Category *</label>
+        <select id="m-b-cat">
+          <option value="Food">Food</option>
+          <option value="Travel">Travel</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Bills">Bills</option>
+          <option value="Study">Study/Tech</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Period</label>
+        <select id="m-b-period">
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Budget Limit (₹) *</label>
+        <input type="number" id="m-b-amt" step="0.01" inputmode="decimal" placeholder="e.g. 5000" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Budget</button>
+    </form>
+  `);
+}
+
+async function submitNewBudget(e) {
+  e.preventDefault();
+  const category = document.getElementById('m-b-cat').value;
+  const period = document.getElementById('m-b-period').value;
+  const amount = parseFloat(document.getElementById('m-b-amt').value);
+
+  const res = await fetch('/api/budgets', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ category, period, amount })
+  });
+  if (res.ok) {
+    closeGenericSheet();
+    showToast(`Saved ${period} budget for ${category}`);
+    refresh();
+  }
+}
+
+function openAddSubModal() {
+  openGenericSheet('Track Subscription', `
+    <form onsubmit="submitNewSub(event)">
+      <div class="field">
+        <label>Subscription Name *</label>
+        <input type="text" id="m-s-name" placeholder="e.g. Netflix or Spotify" required/>
+      </div>
+      <div class="field">
+        <label>Amount (₹) *</label>
+        <input type="number" id="m-s-amt" step="0.01" inputmode="decimal" placeholder="e.g. 199" required/>
+      </div>
+      <div class="field">
+        <label>Billing Cycle</label>
+        <select id="m-s-cycle">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Next Renewal Date *</label>
+        <input type="date" id="m-s-date" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Subscription</button>
+    </form>
+  `);
+}
+
+async function submitNewSub(e) {
+  e.preventDefault();
+  const name = document.getElementById('m-s-name').value.trim();
+  const amount = parseFloat(document.getElementById('m-s-amt').value);
+  const billing_cycle = document.getElementById('m-s-cycle').value;
+  const next_renewal_date = document.getElementById('m-s-date').value;
+
+  const res = await fetch('/api/subscriptions', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, amount, billing_cycle, next_renewal_date })
+  });
+  if (res.ok) {
+    closeGenericSheet();
+    showToast(`Added ${name} subscription`);
+    refresh();
+  }
+}
+
+function openAddBillModal() {
+  openGenericSheet('Schedule Recurring Bill', `
+    <form onsubmit="submitNewBill(event)">
+      <div class="field">
+        <label>Bill Name *</label>
+        <input type="text" id="m-bill-name" placeholder="e.g. House Rent or Wifi Bill" required/>
+      </div>
+      <div class="field">
+        <label>Amount (₹) *</label>
+        <input type="number" id="m-bill-amt" step="0.01" inputmode="decimal" placeholder="e.g. 15000" required/>
+      </div>
+      <div class="field">
+        <label>Due Date *</label>
+        <input type="date" id="m-bill-date" required/>
+      </div>
+      <div class="field">
+        <label>Frequency</label>
+        <select id="m-bill-freq">
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Bill</button>
+    </form>
+  `);
+}
+
+async function submitNewBill(e) {
+  e.preventDefault();
+  const name = document.getElementById('m-bill-name').value.trim();
+  const amount = parseFloat(document.getElementById('m-bill-amt').value);
+  const due_date = document.getElementById('m-bill-date').value;
+  const frequency = document.getElementById('m-bill-freq').value;
+
+  const res = await fetch('/api/recurring-bills', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, amount, due_date, frequency })
+  });
+  if (res.ok) {
+    closeGenericSheet();
+    showToast(`Scheduled bill ${name}`);
+    refresh();
+  }
+}
+
+function openAddGoalModal() {
+  openGenericSheet('New Savings Goal', `
+    <form onsubmit="submitNewGoal(event)">
+      <div class="field">
+        <label>Goal Name *</label>
+        <input type="text" id="m-g-name" placeholder="e.g. Emergency Fund or Vacation" required/>
+      </div>
+      <div class="field">
+        <label>Target Amount (₹) *</label>
+        <input type="number" id="m-g-target" step="0.01" inputmode="decimal" placeholder="e.g. 50000" required/>
+      </div>
+      <div class="field">
+        <label>Starting Amount (₹)</label>
+        <input type="number" id="m-g-cur" step="0.01" inputmode="decimal" placeholder="0.00"/>
+      </div>
+      <div class="field">
+        <label>Target Date</label>
+        <input type="date" id="m-g-date"/>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px">Save Goal</button>
+    </form>
+  `);
+}
+
+async function submitNewGoal(e) {
+  e.preventDefault();
+  const name = document.getElementById('m-g-name').value.trim();
+  const target_amount = parseFloat(document.getElementById('m-g-target').value);
+  const current_amount = parseFloat(document.getElementById('m-g-cur').value) || 0;
+  const target_date = document.getElementById('m-g-date').value;
+
+  const res = await fetch('/api/savings-goals', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, target_amount, current_amount, target_date })
+  });
+  if (res.ok) {
+    closeGenericSheet();
+    showToast(`Created savings goal ${name}`);
+    refresh();
+  }
+}
+
+async function depositGoalPrompt(id) {
+  const amt = prompt('Enter deposit amount to add to savings goal (₹):');
+  if (!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
+  await fetch(`/api/savings-goals/${id}/deposit`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ amount: parseFloat(amt) })
+  });
+  haptic('success');
+  showToast(`Deposited +${fmt(amt)} to goal`);
+  refresh();
+}
+
+async function payBill(id) {
+  if (!confirm('Mark this bill as paid? This will log an expense transaction and advance the next due date.')) return;
+  const res = await fetch(`/api/recurring-bills/${id}/pay`, { method: 'POST' });
+  if (res.ok) {
+    haptic('success');
+    showToast('Bill marked paid & logged');
+    refresh();
+  }
+}
+
+async function delBudget(id) {
+  if (!confirm('Delete budget?')) return;
+  await fetch(`/api/budgets/${id}`, { method: 'DELETE' });
+  refresh();
+}
+
+async function delSub(id) {
+  if (!confirm('Delete subscription?')) return;
+  await fetch(`/api/subscriptions/${id}`, { method: 'DELETE' });
+  refresh();
+}
+
+async function delBill(id) {
+  if (!confirm('Delete recurring bill?')) return;
+  await fetch(`/api/recurring-bills/${id}`, { method: 'DELETE' });
+  refresh();
+}
+
+async function delGoal(id) {
+  if (!confirm('Delete savings goal?')) return;
+  await fetch(`/api/savings-goals/${id}`, { method: 'DELETE' });
+  refresh();
+}
+
+// ── Udhaar Ledger ──
 function renderUdhaarLedger() {
   const container = document.getElementById('udhaar-people-container');
   const people = state.people || [];
@@ -1840,7 +2458,7 @@ function renderPauseVault() {
   }).join('');
 }
 
-// ── Analytics Screen Visuals ──
+// ── Analytics Screen ──
 function renderAnalytics() {
   const txs = state.transactions || [];
   let totalInc = 0;
@@ -1888,31 +2506,31 @@ function renderAnalytics() {
     }).join('');
   }
 
-  // Pacing Health
-  const budget = Number(state.monthlyBudget || 25000);
-  const [y, m] = selectedMonth.split('-').map(Number);
-  const daysInMonth = new Date(y, m, 0).getDate();
-  const dayNow = Math.min(daysInMonth, new Date().getDate());
-  const expectedPace = budget * (dayNow / daysInMonth);
-
-  const pText = document.getElementById('analytics-pacing-text');
-  const pSub = document.getElementById('analytics-pacing-sub');
-  if (totalExp > budget) {
-    pText.textContent = 'Status: Over Budget Limit';
-    pText.style.color = 'var(--red)';
-    pSub.textContent = `You have exceeded your monthly budget by ${fmt(totalExp - budget)}.`;
-  } else if (totalExp > expectedPace * 1.15) {
-    pText.textContent = 'Status: Spending Ahead of Pace';
-    pText.style.color = 'var(--amber)';
-    pSub.textContent = `Spending is higher than expected at day ${dayNow} of ${daysInMonth}.`;
+  // Credit Card Utilization Analytics
+  const ccs = (state.accounts || []).filter(a => a.type === 'credit_card');
+  const ccContainer = document.getElementById('analytics-cc-list');
+  if (!ccs.length) {
+    ccContainer.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No credit cards added.</div>';
   } else {
-    pText.textContent = 'Status: On Track with Budget';
-    pText.style.color = 'var(--green)';
-    pSub.textContent = `You are maintaining a healthy spend velocity within your ${fmt(budget)} limit.`;
+    ccContainer.innerHTML = ccs.map(c => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600">
+          <span>${c.name}</span>
+          <span>${c.utilization_pct}% (${mask(fmt(c.balance))} / ${mask(fmt(c.credit_limit))})</span>
+        </div>
+        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden;margin:4px 0">
+          <div style="height:100%;width:${c.utilization_pct}%;background:${c.utilization_pct > 80 ? 'var(--red)' : c.utilization_pct >= 40 ? 'var(--amber)' : 'var(--blue)'}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)">
+          <span>Statement: ${c.statement_date}th</span>
+          <span>Payment Due: ${c.due_date}th</span>
+        </div>
+      </div>
+    `).join('');
   }
 }
 
-// ── Submit Transaction (Form Sheet) ──
+// ── Submit Transaction ──
 async function submitTx(e) {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('f-amount').value);
@@ -1967,7 +2585,7 @@ async function delTx(id) {
 }
 
 async function editAccount(id) {
-  const acc = state.accounts.find(a => a.id === id) || state.accounts[id - 1];
+  const acc = state.accounts.find(a => a.id === id);
   if (!acc) return;
   const val = prompt(`Update balance for ${acc.name}:`, acc.balance);
   if (val === null || isNaN(val)) return;
@@ -1976,13 +2594,13 @@ async function editAccount(id) {
   refresh();
 }
 
-async function editBudgetPrompt() {
-  const cur = state.monthlyBudget || 25000;
-  const val = prompt('Set Monthly Budget Target (₹):', cur);
-  if (val === null || isNaN(val) || parseFloat(val) <= 0) return;
-  await fetch('/api/budget', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ budget: parseFloat(val) }) });
-  haptic('success');
-  refresh();
+function exportDataBackup() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+  const dl = document.createElement('a');
+  dl.setAttribute("href", dataStr);
+  dl.setAttribute("download", `udhaar-backup-${new Date().toISOString().slice(0,10)}.json`);
+  dl.click();
+  showToast('Backup JSON downloaded');
 }
 
 async function syncNotesPrompt() {
@@ -2006,7 +2624,7 @@ async function submitPin() {
   }
 }
 
-// ── Service Worker Registration (PWA Standalone) ──
+// ── Service Worker Registration ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW registration skipped:', e));
