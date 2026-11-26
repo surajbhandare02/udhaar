@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Udhaar"/>
+<meta name="format-detection" content="telephone=no"/>
 <meta name="theme-color" content="#f8fafc" id="meta-theme-color"/>
 <title>Udhaar — Personal Finance & Ledger</title>
 <link rel="manifest" href="/manifest.json"/>
@@ -32,11 +33,11 @@
   --amber-bg: #fffbeb;
   --nav-bg: rgba(255, 255, 255, 0.88);
   --sheet-bg: #ffffff;
-  --backdrop: rgba(15, 23, 42, 0.4);
+  --backdrop: rgba(15, 23, 42, 0.45);
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
-  --shadow-sheet: 0 -8px 32px rgba(0,0,0,0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.07);
+  --shadow-sheet: 0 -8px 32px rgba(0,0,0,0.14);
 }
 
 [data-theme="dark"] {
@@ -60,38 +61,89 @@
   --nav-bg: rgba(19, 25, 38, 0.88);
   --sheet-bg: #131926;
   --backdrop: rgba(0, 0, 0, 0.65);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
   --shadow-sheet: 0 -8px 32px rgba(0,0,0,0.5);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); -webkit-tap-highlight-color: transparent; }
-html, body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.4; width: 100%; overflow-x: hidden; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+}
 
-/* Shell Layout (iPhone 14 width 390px, adaptive up to 430px) */
+/* Native iOS PWA Viewport Lock (prevents rubber-banding outer page) */
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.4;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior-y: none;
+}
+
+input, select, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+/* iOS Standalone Shell */
 .ios-shell {
   width: 100%;
   max-width: 430px;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   position: relative;
   background: var(--bg);
 }
 
+/* Pull to Refresh Indicator */
+.ptr-wrap {
+  width: 100%;
+  height: 0px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: height 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  gap: 6px;
+}
+.ptr-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.ptr-wrap.refreshing .ptr-icon {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Momentum Scrolling Screen Content */
 .screen-content {
   flex: 1;
-  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(env(safe-area-inset-bottom, 0px) + 88px);
+  padding: calc(env(safe-area-inset-top, 20px) + 8px) 16px calc(env(safe-area-inset-bottom, 20px) + 80px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 .view-section { display: none; }
-.view-section.active { display: block; animation: fadeIn 0.18s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.view-section.active { display: block; animation: fadeIn 0.16s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Cards & Elements */
+/* Cards & Buttons */
 .card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -210,7 +262,7 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
 }
 .ribbon-wrap::-webkit-scrollbar { display: none; }
 .account-tile {
-  min-width: 140px;
+  min-width: 136px;
   flex: 1;
   background: var(--card);
   border: 1px solid var(--border);
@@ -236,7 +288,7 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
 .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .section-action { font-size: 12px; font-weight: 600; color: var(--blue); cursor: pointer; text-decoration: none; }
 
-/* Compact Transaction Rows (iOS Style) */
+/* Compact iOS Transaction Rows */
 .tx-row {
   display: flex;
   align-items: center;
@@ -245,7 +297,9 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
   border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
   min-height: 44px;
+  transition: background 0.1s ease;
 }
+.tx-row:active { background: var(--card-subtle); }
 .tx-row:last-child { border-bottom: none; }
 .tx-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .tx-icon-wrap {
@@ -349,14 +403,22 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
 .cat-bar-bg { height: 6px; background: var(--card-subtle); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
 .cat-bar-fill { height: 100%; background: var(--blue); border-radius: 3px; }
 
+/* Interactive Sparkline Chart (Home View) */
+.sparkline-svg {
+  width: 100%;
+  height: 54px;
+  overflow: visible;
+  margin-top: 6px;
+}
+
 /* Fixed iOS Bottom Tab Bar */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: calc(58px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(54px + env(safe-area-inset-bottom, 20px));
+  padding-bottom: env(safe-area-inset-bottom, 20px);
   background: var(--nav-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -382,23 +444,24 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
   font-size: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, transform 0.1s ease;
 }
+.nav-tab:active { transform: scale(0.92); }
 .nav-tab.active { color: var(--blue); }
 .nav-tab svg { width: 20px; height: 20px; }
 
 /* Floating Quick Add Button (FAB) */
 .fab-btn {
   position: fixed;
-  right: 20px;
-  bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  right: 18px;
+  bottom: calc(68px + env(safe-area-inset-bottom, 20px));
   width: 52px;
   height: 52px;
   border-radius: 26px;
   background: var(--blue);
   color: #fff;
   border: none;
-  box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.38);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -406,7 +469,7 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
   z-index: 101;
   transition: transform 0.15s ease;
 }
-.fab-btn:active { transform: scale(0.92); }
+.fab-btn:active { transform: scale(0.9); }
 
 /* iOS Bottom Sheet Modal */
 .sheet-overlay {
@@ -432,7 +495,7 @@ html, body { background: var(--bg); color: var(--text); font-size: 14px; line-he
   background: var(--sheet-bg);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
-  padding: 12px 18px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  padding: 12px 18px calc(env(safe-area-inset-bottom, 20px) + 20px);
   box-shadow: var(--shadow-sheet);
   z-index: 201;
   transform: translateY(105%);
@@ -471,7 +534,7 @@ input, select {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 0 12px;
-  font-size: 16px !important; /* Prevents iOS Safari auto-zoom */
+  font-size: 16px !important;
   outline: none;
   background: var(--card);
   color: var(--text);
@@ -484,7 +547,7 @@ input:focus, select:focus { border-color: var(--blue); }
 /* Toast */
 .toast {
   position: fixed;
-  bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(72px + env(safe-area-inset-bottom, 20px));
   left: 50%;
   transform: translateX(-50%);
   background: var(--navy);
@@ -522,7 +585,14 @@ input:focus, select:focus { border-color: var(--blue); }
 
 <!-- Main iOS Shell -->
 <div class="ios-shell">
-  <div class="screen-content">
+
+  <!-- Pull to Refresh Visual Indicator -->
+  <div id="ptr-indicator" class="ptr-wrap">
+    <span class="ptr-icon" id="ptr-icon"></span>
+    <span id="ptr-text">Pull to refresh</span>
+  </div>
+
+  <div class="screen-content" id="scroll-container">
 
     <!-- Top Personalized Header -->
     <div class="top-nav">
@@ -532,7 +602,7 @@ input:focus, select:focus { border-color: var(--blue); }
       </div>
       <div class="header-actions">
         <button class="btn btn-icon" onclick="toggleTheme()" title="Toggle Theme" id="btn-theme"></button>
-        <button class="btn btn-icon" onclick="refresh()" title="Refresh" id="btn-refresh"></button>
+        <button class="btn btn-icon" onclick="manualRefresh()" title="Refresh" id="btn-refresh"></button>
       </div>
     </div>
 
@@ -575,16 +645,18 @@ input:focus, select:focus { border-color: var(--blue); }
       </div>
       <div class="ribbon-wrap" id="accounts-ribbon"></div>
 
-      <!-- Spending Velocity & Burn Pacing Card -->
+      <!-- Spending Velocity & Interactive Trend Card -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase">Burn Rate Velocity</span>
+          <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase">Spending Velocity</span>
           <span style="font-size:11px;color:var(--muted)" id="home-budget-target">Target: ₹25,000</span>
         </div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:6px" id="home-velocity-readout">₹0/day avg · Projected ₹0</div>
-        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px" id="home-velocity-readout">₹0/day avg · Projected ₹0</div>
+        <div style="height:6px;background:var(--card-subtle);border-radius:3px;overflow:hidden;margin-bottom:8px">
           <div id="home-budget-bar" style="height:100%;width:0%;background:var(--blue);transition:width 0.3s"></div>
         </div>
+        <!-- Interactive Sparkline SVG -->
+        <div id="home-sparkline-wrap"></div>
       </div>
 
       <!-- Recent Transactions Preview -->
@@ -732,7 +804,7 @@ input:focus, select:focus { border-color: var(--blue); }
         <div class="monogram" style="width:48px;height:48px;font-size:18px">SB</div>
         <div>
           <div style="font-weight:800;font-size:16px">Suraj Bhandare</div>
-          <div style="font-size:12px;color:var(--muted)">Personal Finance Ledger</div>
+          <div style="font-size:12px;color:var(--muted)">Personal Finance Ledger (iOS Standalone)</div>
         </div>
       </div>
 
@@ -952,6 +1024,7 @@ const icon = name => ICONS[name] || '';
 
 // Inject Initial Icons
 document.getElementById('pin-lock-icon').innerHTML = icon('lock');
+document.getElementById('ptr-icon').innerHTML = icon('refresh');
 document.getElementById('btn-refresh').innerHTML = icon('refresh');
 document.getElementById('btn-theme').innerHTML = icon('moon');
 document.getElementById('btn-theme-label').innerHTML = icon('moon') + ' Theme';
@@ -981,6 +1054,17 @@ document.getElementById('tab-ico-udhaar').innerHTML = icon('repeat');
 document.getElementById('tab-ico-trf').innerHTML = icon('repeat');
 document.getElementById('ico-split-label').innerHTML = icon('split');
 
+// ── Native Haptic Feedback Helper ──
+function haptic(type = 'light') {
+  if ('vibrate' in navigator) {
+    try {
+      if (type === 'light') navigator.vibrate(10);
+      else if (type === 'medium') navigator.vibrate(22);
+      else if (type === 'success') navigator.vibrate([10, 30, 15]);
+    } catch (e) {}
+  }
+}
+
 // ── State Management ──
 let state = { accounts: [], people: [], monthlyExpense: 0, monthlyBudget: 25000, pausedItems: [], savedByWaiting: 0, currentMonth: '', transactions: [] };
 let activeTab = 'home';
@@ -1007,6 +1091,7 @@ function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
+  haptic('medium');
   setTimeout(() => el.classList.remove('show'), 2800);
 }
 
@@ -1027,6 +1112,7 @@ function applyTheme(isDark) {
 }
 
 function toggleTheme() {
+  haptic('light');
   const cur = document.documentElement.getAttribute('data-theme') === 'dark';
   const next = !cur;
   localStorage.setItem('theme', next ? 'dark' : 'light');
@@ -1036,6 +1122,7 @@ initTheme();
 
 // ── Navigation Tabs ──
 function switchTab(tabName) {
+  haptic('light');
   activeTab = tabName;
   document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1046,11 +1133,12 @@ function switchTab(tabName) {
   if (btn) btn.classList.add('active');
 
   if (tabName === 'analytics') renderAnalytics();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('scroll-container').scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Balance Mask Toggle ──
 function toggleBalanceVisibility() {
+  haptic('light');
   hideBalance = !hideBalance;
   localStorage.setItem('hideBalance', hideBalance);
   document.getElementById('btn-balance-eye').innerHTML = hideBalance ? icon('eye-off') : icon('eye');
@@ -1060,6 +1148,7 @@ if (hideBalance) document.getElementById('btn-balance-eye').innerHTML = icon('ey
 
 // ── Month Switcher ──
 function changeMonth(delta) {
+  haptic('light');
   const [y, m] = selectedMonth.split('-').map(Number);
   const d = new Date(y, m - 1 + delta, 1);
   selectedMonth = d.toISOString().slice(0, 7);
@@ -1076,6 +1165,7 @@ function updateMonthDisplay() {
 
 // ── Form Bottom Sheet Controls ──
 function openAddSheet() {
+  haptic('light');
   document.getElementById('add-sheet-overlay').classList.add('open');
   document.getElementById('add-sheet').classList.add('open');
 }
@@ -1086,6 +1176,7 @@ function closeAddSheet() {
 }
 
 function setType(t) {
+  haptic('light');
   activeType = t;
   document.querySelectorAll('#type-tabs .tab').forEach((b, i) => b.classList.toggle('active', ['expense','income','gaveTook','transfer'][i] === t));
   document.getElementById('split-toggle-wrap').style.display = t === 'expense' ? 'block' : 'none';
@@ -1113,6 +1204,7 @@ function updateSplitCalc() {
 
 // ── Tap to Filter ──
 function handleAccountFilter(accId, accName) {
+  haptic('light');
   if (activeFilter && activeFilter.type === 'account' && activeFilter.id === accId) {
     resetActiveFilter();
   } else {
@@ -1124,6 +1216,7 @@ function handleAccountFilter(accId, accName) {
 }
 
 function filterByPerson(personName) {
+  haptic('light');
   if (activeFilter && activeFilter.type === 'person' && activeFilter.name.toLowerCase() === personName.toLowerCase()) {
     resetActiveFilter();
   } else {
@@ -1135,6 +1228,7 @@ function filterByPerson(personName) {
 }
 
 function resetActiveFilter() {
+  haptic('light');
   activeFilter = null;
   updateFilterHighlights();
   renderTxList();
@@ -1156,6 +1250,7 @@ function updateFilterHighlights() {
 }
 
 function setTxFilterType(type, btn) {
+  haptic('light');
   txFilterType = type;
   document.querySelectorAll('.chip-row .chip').forEach(c => c.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -1191,6 +1286,7 @@ async function runOmniCommand() {
       if (res.ok) {
         input.value = '';
         showToast(`Transferred ₹${amt} from ${fromAcc.name} to ${toAcc.name}`);
+        haptic('success');
         refresh();
         return;
       }
@@ -1209,6 +1305,7 @@ async function runOmniCommand() {
     if (res.ok) {
       input.value = '';
       showToast(`Paused ₹${amt} for "${name}" in Cooldown Vault`);
+      haptic('success');
       refresh();
       return;
     }
@@ -1234,6 +1331,7 @@ async function runOmniCommand() {
       if (res.ok) {
         input.value = '';
         showToast(`Split ₹${total} (${parts} ways: ₹${eachShare} each)`);
+        haptic('success');
         refresh();
         return;
       }
@@ -1253,6 +1351,7 @@ async function runOmniCommand() {
     if (res.ok) {
       input.value = '';
       showToast(`Lent ₹${amt} to ${person}`);
+      haptic('success');
       refresh();
       return;
     }
@@ -1271,6 +1370,7 @@ async function runOmniCommand() {
     if (res.ok) {
       input.value = '';
       showToast(`Borrowed ₹${amt} from ${person}`);
+      haptic('success');
       refresh();
       return;
     }
@@ -1298,6 +1398,7 @@ async function runOmniCommand() {
     if (res.ok) {
       input.value = '';
       showToast(`Logged ₹${amt} ${type} (${desc})`);
+      haptic('success');
       refresh();
       return;
     }
@@ -1305,6 +1406,61 @@ async function runOmniCommand() {
 
   alert('Could not parse command. Try:\n• 240 swiggy\n• 500 gave rahul\n• 300 took amit\n• 900 split amit neha\n• 2000 bank to cash\n• pause 4500 headphones');
 }
+
+// ── Native Pull to Refresh ──
+function manualRefresh() {
+  haptic('light');
+  refresh();
+}
+
+function initPullToRefresh() {
+  const container = document.getElementById('scroll-container');
+  const indicator = document.getElementById('ptr-indicator');
+  const iconSpan = document.getElementById('ptr-icon');
+  const textSpan = document.getElementById('ptr-text');
+  let startY = 0;
+  let currentY = 0;
+  let pulling = false;
+
+  container.addEventListener('touchstart', e => {
+    if (container.scrollTop <= 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+    }
+  }, { passive: true });
+
+  container.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+    if (diff > 0 && container.scrollTop <= 0) {
+      const height = Math.min(60, diff * 0.45);
+      indicator.style.height = `${height}px`;
+      iconSpan.style.transform = `rotate(${Math.min(180, diff * 2)}deg)`;
+      textSpan.textContent = height >= 44 ? 'Release to refresh' : 'Pull to refresh';
+    }
+  }, { passive: true });
+
+  container.addEventListener('touchend', async () => {
+    if (!pulling) return;
+    pulling = false;
+    const diff = currentY - startY;
+    if (diff > 90 && container.scrollTop <= 0) {
+      indicator.style.height = '44px';
+      indicator.classList.add('refreshing');
+      textSpan.textContent = 'Updating...';
+      haptic('medium');
+      await refresh();
+      indicator.classList.remove('refreshing');
+      indicator.style.height = '0px';
+    } else {
+      indicator.style.height = '0px';
+    }
+    startY = 0;
+    currentY = 0;
+  });
+}
+initPullToRefresh();
 
 // ── Refresh & State Synchronization ──
 async function refresh() {
@@ -1362,6 +1518,9 @@ async function refresh() {
     hBar.style.background = barColor;
     bBar.style.background = barColor;
 
+    // Render Home Interactive Sparkline
+    renderSparkline();
+
     // 3. Accounts Ribbon
     document.getElementById('accounts-ribbon').innerHTML = state.accounts.map(a => {
       const isBank = /upi|bank/i.test(a.name);
@@ -1393,6 +1552,39 @@ async function refresh() {
     renderPauseVault();
     if (activeTab === 'analytics') renderAnalytics();
   } catch(e) { console.error(e); }
+}
+
+// ── Interactive Sparkline SVG (Home View) ──
+function renderSparkline() {
+  const container = document.getElementById('home-sparkline-wrap');
+  const txs = (state.transactions || []).filter(t => t.type === 'expense').slice(0, 10).reverse();
+  if (!txs.length) {
+    container.innerHTML = '';
+    return;
+  }
+  const maxVal = Math.max(...txs.map(t => Number(t.amount || 0)), 100);
+  const width = 340;
+  const height = 44;
+  const barWidth = Math.max(12, Math.floor((width - (txs.length * 6)) / txs.length));
+
+  const bars = txs.map((t, idx) => {
+    const h = Math.max(4, Math.round((Number(t.amount || 0) / maxVal) * (height - 8)));
+    const x = idx * (barWidth + 6);
+    const y = height - h;
+    return `<rect x="${x}" y="${y}" width="${barWidth}" height="${h}" rx="3" fill="var(--blue)" opacity="0.85">
+      <title>${t.merchant || t.category || 'Expense'}: ${fmt(t.amount)}</title>
+    </rect>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;margin-top:6px;display:flex;justify-content:space-between">
+      <span>Recent Spend Trend</span>
+      <span>Peak: ${mask(fmt(maxVal))}</span>
+    </div>
+    <svg class="sparkline-svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+      ${bars}
+    </svg>
+  `;
 }
 
 // ── Render Recent Activity (Home Screen) ──
@@ -1458,6 +1650,7 @@ function renderTxRowHTML(t) {
 
 // ── Detail Sheet Modal ──
 function openDetailSheet(id) {
+  haptic('light');
   const tx = (state.transactions || []).find(t => t.id === id);
   if (!tx) return;
   const isDebit = ['expense','lent','settle_out','transfer'].includes(tx.type);
@@ -1541,6 +1734,7 @@ function renderUdhaarLedger() {
 }
 
 function toggleInlineSettleDrawer(id) {
+  haptic('light');
   const el = document.getElementById(`settle-drawer-${id}`);
   if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
 }
@@ -1560,11 +1754,13 @@ async function confirmInlineSettle(personId, isReceive) {
       note: 'Settled'
     })
   });
+  haptic('success');
   refresh();
 }
 
 // ── 24h Pause Vault ──
 function togglePauseVault() {
+  haptic('light');
   const c = document.getElementById('vault-content');
   c.style.display = c.style.display === 'none' ? 'block' : 'none';
 }
@@ -1582,6 +1778,7 @@ async function addVaultItem() {
     document.getElementById('vault-input-name').value = '';
     document.getElementById('vault-input-amt').value = '';
     showToast(`Added ${name} to 24h Cooldown`);
+    haptic('success');
     refresh();
   }
 }
@@ -1591,6 +1788,7 @@ async function commitVaultItem(id) {
   const res = await fetch(`/api/cooldown/${id}/commit`, { method: 'POST' });
   if (res.ok) {
     showToast('Purchase finalized as expense');
+    haptic('success');
     refresh();
   }
 }
@@ -1599,6 +1797,7 @@ async function skipVaultItem(id, amt) {
   const res = await fetch(`/api/cooldown/${id}/skip`, { method: 'POST' });
   if (res.ok) {
     showToast(`Impulse avoided! Saved +${fmt(amt)}`);
+    haptic('success');
     refresh();
   }
 }
@@ -1751,6 +1950,7 @@ async function submitTx(e) {
     }
     closeAddSheet();
     showToast('Transaction saved');
+    haptic('success');
     refresh();
   } else {
     const err = await res.json(); alert(err.error || 'Failed to save');
@@ -1762,6 +1962,7 @@ async function delTx(id) {
   await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
   closeDetailSheet();
   showToast('Transaction deleted');
+  haptic('medium');
   refresh();
 }
 
@@ -1771,6 +1972,7 @@ async function editAccount(id) {
   const val = prompt(`Update balance for ${acc.name}:`, acc.balance);
   if (val === null || isNaN(val)) return;
   await fetch(`/api/accounts/${acc.id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ balance: parseFloat(val) }) });
+  haptic('success');
   refresh();
 }
 
@@ -1779,6 +1981,7 @@ async function editBudgetPrompt() {
   const val = prompt('Set Monthly Budget Target (₹):', cur);
   if (val === null || isNaN(val) || parseFloat(val) <= 0) return;
   await fetch('/api/budget', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ budget: parseFloat(val) }) });
+  haptic('success');
   refresh();
 }
 
@@ -1787,16 +1990,23 @@ async function syncNotesPrompt() {
   if (!raw) return;
   const res = await fetch('/api/webhook/sms', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ raw_text: raw }) }).then(r=>r.json());
   alert(`Imported: ${res.imported || 0}, Duplicates: ${res.duplicates || 0}, Ignored: ${res.ignored || 0}`);
+  haptic('success');
   refresh();
 }
 
 async function submitPin() {
   const pin = document.getElementById('pin-input').value;
   const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ pin }) });
-  if (res.ok) refresh(); else alert('Incorrect PIN');
+  if (res.ok) {
+    haptic('success');
+    refresh();
+  } else {
+    haptic('medium');
+    alert('Incorrect PIN');
+  }
 }
 
-// ── Service Worker Registration (PWA) ──
+// ── Service Worker Registration (PWA Standalone) ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW registration skipped:', e));

@@ -1,13 +1,14 @@
 {
-  "name": "Ledger",
-  "short_name": "Ledger",
+  "name": "Udhaar — Personal Finance",
+  "short_name": "Udhaar",
   "description": "Personal Expense, Account & People Ledger",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0b0e14",
-  "theme_color": "#0b0e14",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
       "src": "/apple-touch-icon.png",
@@ -16,7 +17,7 @@
     },
     {
       "src": "/icon.svg",
-      "sizes": "any",
+      "sizes": "192x192 512x512 any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
