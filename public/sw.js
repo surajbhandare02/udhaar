@@ -1,5 +1,5 @@
 // Service Worker for Udhaar PWA Shell
-const CACHE_NAME = 'udhaar-shell-v2';
+const CACHE_NAME = 'udhaar-shell-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
