@@ -2,18 +2,16 @@ FROM node:22-alpine
 
 WORKDIR /app
 
+# Install dependencies cleanly
 COPY package*.json ./
-COPY server.js ./
-COPY public ./public
+RUN npm ci --omit=dev
 
-ENV PORT=3000
+# Copy application source files
+COPY . .
+
+ENV PORT=10000
 ENV NODE_ENV=production
-ENV DB_PATH=/app/data/udhaar.db
 
-RUN mkdir -p /app/data
-
-VOLUME ["/app/data"]
-
-EXPOSE 3000
+EXPOSE 10000
 
 CMD ["node", "server.js"]
