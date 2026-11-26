@@ -82,36 +82,60 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { error: 'Incorrect PIN' }, 401);
   }
 
-  // 3. State Endpoint (Consolidated single payload)
+  // 3. State Endpoint with Month Switcher & Budget
   if (req.method === 'GET' && pathname === '/api/state') {
     if (!isAuthed(req)) return sendJSON(res, { requiresPin: true });
 
-    const [accRes, peoRes, monRes, txRes] = await db.batch([
+    const month = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
+    const [y, m] = month.split('-').map(Number);
+    const startMonth = `${month}-01 00:00:00`;
+    const nextMonth = m === 12 ? `${y + 1}-01-01 00:00:00` : `${y}-${String(m + 1).padStart(2, '0')}-01 00:00:00`;
+
+    const [accRes, peoRes, monRes, budRes, txRes] = await db.batch([
       `SELECT id, name, balance FROM accounts ORDER BY id ASC`,
       `SELECT id, name, phone, net_balance FROM people WHERE net_balance != 0 ORDER BY ABS(net_balance) DESC`,
-      `SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE type = 'expense' AND created_at >= date('now', 'start of month')`,
-      `SELECT t.*, a.name AS account_name, a2.name AS to_account_name, p.name AS person_name
-       FROM transactions t
-       LEFT JOIN accounts a ON t.account_id = a.id
-       LEFT JOIN accounts a2 ON t.to_account_id = a2.id
-       LEFT JOIN people p ON t.person_id = p.id
-       ORDER BY t.created_at DESC LIMIT 35`
+      { sql: `SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE type = 'expense' AND created_at >= ? AND created_at < ?`, args: [startMonth, nextMonth] },
+      `SELECT value FROM settings WHERE key = 'monthly_budget' LIMIT 1`,
+      {
+        sql: `SELECT t.*, a.name AS account_name, a2.name AS to_account_name, p.name AS person_name
+              FROM transactions t
+              LEFT JOIN accounts a ON t.account_id = a.id
+              LEFT JOIN accounts a2 ON t.to_account_id = a2.id
+              LEFT JOIN people p ON t.person_id = p.id
+              WHERE t.created_at >= ? AND t.created_at < ?
+              ORDER BY t.created_at DESC LIMIT 50`,
+        args: [startMonth, nextMonth]
+      }
     ], 'read');
 
     return sendJSON(res, {
       accounts: accRes.rows,
       people: peoRes.rows,
       monthlyExpense: Number(monRes.rows[0]?.total || 0),
+      monthlyBudget: Number(budRes.rows[0]?.value || 25000),
+      currentMonth: month,
       transactions: txRes.rows,
       requiresPin: false
     });
   }
 
-  // 4. Create Transaction
+  // 4. Update Monthly Budget
+  if (req.method === 'PUT' && pathname === '/api/budget') {
+    if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
+    const { budget } = await getBody(req);
+    const bVal = parseFloat(budget) || 0;
+    await db.execute({
+      sql: `INSERT INTO settings (key, value) VALUES ('monthly_budget', ?) ON CONFLICT(key) DO UPDATE SET value = ?`,
+      args: [String(bVal), String(bVal)]
+    });
+    return sendJSON(res, { success: true, budget: bVal });
+  }
+
+  // 5. Create Transaction (with Split-Expense support)
   if (req.method === 'POST' && pathname === '/api/transactions') {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
     const body = await getBody(req);
-    const { type, amount, account_id, to_account_id, note, category, merchant, utr } = body;
+    const { type, amount, account_id, to_account_id, note, category, merchant, utr, split_person, split_amount } = body;
     let { person_id, person_name } = body;
     const val = parseFloat(amount);
 
@@ -134,6 +158,42 @@ const server = http.createServer(async (req, res) => {
     }
 
     const stmts = [];
+
+    // Split-Expense Atomic Dual Entry
+    if (type === 'expense' && split_person && parseFloat(split_amount) > 0) {
+      const splitVal = parseFloat(split_amount);
+      const myShare = val - splitVal;
+      if (myShare < 0) return sendJSON(res, { error: 'Split amount cannot exceed total' }, 400);
+
+      let splitPersonId;
+      const spRes = await db.execute({ sql: `SELECT id FROM people WHERE name = ? COLLATE NOCASE`, args: [split_person.trim()] });
+      if (spRes.rows.length) {
+        splitPersonId = spRes.rows[0].id;
+      } else {
+        const insSp = await db.execute({ sql: `INSERT INTO people (name, net_balance) VALUES (?, 0) RETURNING id`, args: [split_person.trim()] });
+        splitPersonId = insSp.rows[0].id;
+      }
+
+      // Total paid from account
+      stmts.push({ sql: `UPDATE accounts SET balance = balance - ? WHERE id = ?`, args: [val, account_id] });
+      // Friend's debt increases by splitVal
+      stmts.push({ sql: `UPDATE people SET net_balance = net_balance + ? WHERE id = ?`, args: [splitVal, splitPersonId] });
+      // My expense share
+      stmts.push({
+        sql: `INSERT INTO transactions (type, amount, account_id, category, merchant, note) VALUES ('expense', ?, ?, ?, ?, ?)`,
+        args: [myShare, account_id, category || 'Food', merchant || null, `${note ? note + ' ' : ''}(My share)`]
+      });
+      // Friend's lent portion
+      stmts.push({
+        sql: `INSERT INTO transactions (type, amount, account_id, person_id, category, merchant, note) VALUES ('lent', ?, ?, ?, ?, ?, ?)`,
+        args: [splitVal, account_id, splitPersonId, category || 'Food', merchant || null, `Split with ${split_person.trim()}`]
+      });
+
+      await db.batch(stmts, 'write');
+      return sendJSON(res, { success: true });
+    }
+
+    // Standard transactions
     if (type === 'expense') stmts.push({ sql: `UPDATE accounts SET balance = balance - ? WHERE id = ?`, args: [val, account_id] });
     else if (type === 'income') stmts.push({ sql: `UPDATE accounts SET balance = balance + ? WHERE id = ?`, args: [val, account_id] });
     else if (type === 'transfer') {
@@ -163,7 +223,7 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { success: true });
   }
 
-  // 5. Update Account Balance
+  // 6. Update Account Balance
   const accMatch = pathname.match(/^\/api\/accounts\/(\d+)$/);
   if (req.method === 'PUT' && accMatch) {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
@@ -172,7 +232,7 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { success: true });
   }
 
-  // 6. Delete Transaction (Atomic reversal)
+  // 7. Delete Transaction (Atomic reversal)
   const txMatch = pathname.match(/^\/api\/transactions\/(\d+)$/);
   if (req.method === 'DELETE' && txMatch) {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
@@ -207,7 +267,7 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { success: true });
   }
 
-  // 7. SMS Webhook (Single / Batch)
+  // 8. SMS Webhook
   if (req.method === 'POST' && pathname === '/api/webhook/sms') {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
     const body = await getBody(req);
@@ -256,7 +316,8 @@ const server = http.createServer(async (req, res) => {
       `DELETE FROM transactions`,
       `DELETE FROM people`,
       `DELETE FROM accounts`,
-      `INSERT INTO accounts (id, name, balance) VALUES (1, 'UPI / Bank', 0), (2, 'Cash', 0), (3, 'Savings', 0)`
+      `INSERT INTO accounts (id, name, balance) VALUES (1, 'UPI / Bank', 0), (2, 'Cash', 0), (3, 'Savings', 0)`,
+      `INSERT OR REPLACE INTO settings (key, value) VALUES ('monthly_budget', '25000')`
     ], 'write');
     return sendJSON(res, { reset: true });
   }

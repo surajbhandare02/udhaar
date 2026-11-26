@@ -129,6 +129,19 @@ describe('Udhaar Ledger Tests', () => {
       assert.equal(await getBalance(UPI_BANK), 0);
       assert.equal(await getPersonBalance('Suresh'), 0);
     });
+
+    it('A8 — split-expense atomically splits into personal expense and lent debtor entry', async () => {
+      const { status } = await api('POST', '/api/transactions', {
+        type: 'expense', amount: 1000, account_id: UPI_BANK, category: 'Food',
+        split_person: 'Rohan', split_amount: 500
+      });
+      assert.equal(status, 200);
+      assert.equal(await getBalance(UPI_BANK), -1000); // 1000 deducted from bank
+      assert.equal(await getPersonBalance('Rohan'), 500); // Rohan owes 500
+
+      const s = await getState();
+      assert.equal(s.monthlyExpense, 500); // Only my 500 share counts toward monthly expense
+    });
   });
 
   describe('Group B: Bank SMS Parser & Webhook', () => {
@@ -167,6 +180,15 @@ Your OTP for login is 482910. Do not share with anyone.`;
       const { status } = await api('PUT', `/api/accounts/${CASH}`, { balance: 1250 });
       assert.equal(status, 200);
       assert.equal(await getBalance(CASH), 1250);
+    });
+
+    it('C3 — PUT /api/budget updates monthly_budget setting and reflects in state', async () => {
+      const { status, body } = await api('PUT', '/api/budget', { budget: 35000 });
+      assert.equal(status, 200);
+      assert.equal(body.budget, 35000);
+
+      const s = await getState();
+      assert.equal(s.monthlyBudget, 35000);
     });
   });
 });

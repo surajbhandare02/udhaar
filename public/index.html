@@ -5,200 +5,586 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#0f172a"/>
-<title>Ledger — Udhaar & Expense</title>
+<title>Ledger — Minimal Fintech Udhaar</title>
 <link rel="manifest" href="/manifest.json"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <link rel="icon" type="image/svg+xml" href="/icon.svg"/>
 <style>
-:root { --bg:#f8fafc; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b; --navy:#0f172a; --green:#15803d; --red:#b91c1c; --font:-apple-system, BlinkMacSystemFont, "Inter", sans-serif; }
+:root {
+  --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b;
+  --navy: #0f172a; --green: #15803d; --red: #b91c1c; --amber: #b45309; --blue: #2563eb;
+  --green-bg: #f0fdf4; --red-bg: #fef2f2; --amber-bg: #fffbeb; --blue-bg: #eff6ff;
+  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
-body { background: var(--bg); color: var(--text); font-size: 14px; }
+body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.4; }
 .app { max-width: 500px; margin: 0 auto; padding: calc(12px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom)); }
 .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
 .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.btn { padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--border); background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text); }
 .btn-primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn-sm { padding: 4px 8px; font-size: 12px; }
+.btn-danger { background: var(--red-bg); color: var(--red); border-color: #fecaca; }
+
+/* Month Bar */
+.month-bar { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; }
+.month-btn { background: transparent; border: none; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; color: var(--muted); border-radius: 4px; }
+.month-btn:hover { background: #f1f5f9; color: var(--text); }
+.month-title { font-weight: 700; font-size: 13px; letter-spacing: -0.01em; }
+
+/* 2x2 Grid */
 .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-.tile { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; cursor: pointer; }
-.tile-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.tile { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; cursor: pointer; position: relative; transition: all 0.15s ease; }
+.tile:hover { border-color: #cbd5e1; }
+.tile.active-filter { border-color: var(--blue); background: var(--blue-bg); box-shadow: 0 0 0 2px rgba(37,99,235,0.15); }
+.tile-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.tile-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 5px; }
 .tile-val { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Budget Bar */
+.budget-bar-wrap { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-top: 6px; }
+.budget-progress { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+/* Form Controls */
 .tabs { display: flex; background: #f1f5f9; padding: 2px; border-radius: 6px; gap: 2px; margin-bottom: 10px; }
-.tab { flex: 1; padding: 6px; font-size: 12px; border-radius: 4px; border: none; background: transparent; cursor: pointer; font-weight: 500; }
+.tab { flex: 1; padding: 6px; font-size: 12px; border-radius: 4px; border: none; background: transparent; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--muted); }
 .tab.active { background: #fff; color: var(--text); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 .field { margin-bottom: 8px; }
 .field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 3px; }
 input, select { width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 16px !important; outline: none; background: #fff; }
-.row-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+/* Split Expense Box */
+.split-box { background: #f8fafc; border: 1px dashed var(--border); border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
+.split-toggle-label { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+
+/* List Rows */
+.row-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
 .row-item:last-child { border-bottom: none; }
-.badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-.badge-green { background: #f0fdf4; color: var(--green); } .badge-red { background: #fef2f2; color: var(--red); }
-.tx-amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-red { background: var(--red-bg); color: var(--red); }
+.badge-filter { background: var(--blue-bg); color: var(--blue); border: 1px solid #bfdbfe; cursor: pointer; }
+.tx-amt { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 13px; }
 .tx-amt.debit { color: var(--red); } .tx-amt.credit { color: var(--green); }
-.del-btn { border: none; background: transparent; color: var(--muted); cursor: pointer; padding: 4px; font-size: 12px; }
+.del-btn { border: none; background: transparent; color: var(--muted); cursor: pointer; padding: 4px; display: flex; align-items: center; border-radius: 4px; }
+.del-btn:hover { color: var(--red); background: #fee2e2; }
+
+/* Inline Settle Drawer */
+.settle-drawer { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin: 4px 0 8px 0; display: none; }
+.settle-drawer.open { display: block; }
+
 .pin-gate { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.svg-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 </style>
 </head>
 <body>
+
+<!-- PIN Gate -->
 <div id="pin-screen" class="pin-gate" style="display:none">
-  <div style="font-size:26px;font-weight:800;margin-bottom:8px">₹ Ledger</div>
-  <p style="color:var(--muted);margin-bottom:14px;font-size:13px">Enter 4-digit PIN</p>
+  <div style="display:flex;align-items:center;gap:8px;font-size:24px;font-weight:800;margin-bottom:6px">
+    <span id="pin-lock-icon"></span> Ledger
+  </div>
+  <p style="color:var(--muted);margin-bottom:14px;font-size:13px">Enter PIN passcode</p>
   <input type="password" id="pin-input" inputmode="numeric" maxlength="6" style="width:170px;text-align:center;font-size:22px!important;letter-spacing:6px;margin-bottom:12px" autofocus/>
   <button class="btn btn-primary" onclick="submitPin()" style="width:170px">Unlock</button>
 </div>
 
 <div class="app">
+  <!-- Top Header -->
   <div class="header">
     <div>
-      <div style="font-size:1.05rem;font-weight:700">Udhaar Ledger</div>
+      <div style="font-size:1.05rem;font-weight:700;letter-spacing:-0.02em">Udhaar Ledger</div>
       <div style="font-size:11px;color:var(--muted)" id="header-date">Today</div>
     </div>
     <div style="display:flex;gap:6px">
-      <button class="btn" onclick="refresh()" title="Refresh">🔄</button>
-      <button class="btn" onclick="syncNotesPrompt()" title="Import SMS/Notes">📋</button>
+      <button class="btn" onclick="refresh()" title="Refresh Data" id="btn-refresh"></button>
+      <button class="btn" onclick="syncNotesPrompt()" title="Import SMS/Notes" id="btn-sync"></button>
     </div>
   </div>
 
-  <div class="grid-2x2">
-    <div class="tile" onclick="editAccount(1)"><div class="tile-label">UPI / Bank</div><div class="tile-val" id="val-bank">₹0</div></div>
-    <div class="tile" onclick="editAccount(2)"><div class="tile-label">Cash</div><div class="tile-val" id="val-cash">₹0</div></div>
-    <div class="tile"><div class="tile-label">Month Spent</div><div class="tile-val" style="color:var(--red)" id="val-spent">₹0</div></div>
-    <div class="tile"><div class="tile-label">Udhaar Net</div><div class="tile-val" id="val-udhaar">₹0</div></div>
+  <!-- Month Navigation Switcher (< Month Year >) -->
+  <div class="month-bar">
+    <button class="month-btn" onclick="changeMonth(-1)" title="Previous Month" id="btn-prev-month"></button>
+    <div class="month-title" id="display-month">Current Month</div>
+    <button class="month-btn" onclick="changeMonth(1)" title="Next Month" id="btn-next-month"></button>
   </div>
 
+  <!-- 2x2 Summary Grid -->
+  <div class="grid-2x2">
+    <!-- UPI / Bank -->
+    <div class="tile" id="tile-bank" onclick="handleTileClick(1, 'UPI / Bank')">
+      <div class="tile-head">
+        <span class="tile-label"><span id="ico-bank"></span> UPI / Bank</span>
+        <button class="month-btn" style="padding:0" title="Adjust Balance" onclick="event.stopPropagation();editAccount(1)">
+          <span id="ico-edit-bank"></span>
+        </button>
+      </div>
+      <div class="tile-val" id="val-bank">₹0.00</div>
+    </div>
+
+    <!-- Cash -->
+    <div class="tile" id="tile-cash" onclick="handleTileClick(2, 'Cash')">
+      <div class="tile-head">
+        <span class="tile-label"><span id="ico-cash"></span> Cash</span>
+        <button class="month-btn" style="padding:0" title="Adjust Balance" onclick="event.stopPropagation();editAccount(2)">
+          <span id="ico-edit-cash"></span>
+        </button>
+      </div>
+      <div class="tile-val" id="val-cash">₹0.00</div>
+    </div>
+
+    <!-- Month Spent + Budget Progress Bar -->
+    <div class="tile" onclick="editBudgetPrompt()">
+      <div class="tile-head">
+        <span class="tile-label"><span id="ico-spent"></span> Spent</span>
+        <span style="font-size:10px;color:var(--muted);cursor:pointer" id="budget-target-label">/ ₹25,000</span>
+      </div>
+      <div class="tile-val" style="color:var(--red)" id="val-spent">₹0.00</div>
+      <div class="budget-bar-wrap">
+        <div class="budget-progress" id="budget-bar" style="width:0%;background:var(--blue)"></div>
+      </div>
+    </div>
+
+    <!-- Udhaar Net -->
+    <div class="tile" onclick="resetActiveFilter()">
+      <div class="tile-head">
+        <span class="tile-label"><span id="ico-udhaar"></span> Udhaar Net</span>
+      </div>
+      <div class="tile-val" id="val-udhaar">₹0.00</div>
+    </div>
+  </div>
+
+  <!-- Quick-Add Entry Form -->
   <div class="card">
     <div class="tabs" id="type-tabs">
-      <button type="button" class="tab active" onclick="setType('expense')">Expense</button>
-      <button type="button" class="tab" onclick="setType('income')">Income</button>
-      <button type="button" class="tab" onclick="setType('gaveTook')">Gave/Took</button>
-      <button type="button" class="tab" onclick="setType('transfer')">Transfer</button>
+      <button type="button" class="tab active" onclick="setType('expense')"><span id="tab-ico-exp"></span> Expense</button>
+      <button type="button" class="tab" onclick="setType('income')"><span id="tab-ico-inc"></span> Income</button>
+      <button type="button" class="tab" onclick="setType('gaveTook')"><span id="tab-ico-udhaar"></span> Udhaar</button>
+      <button type="button" class="tab" onclick="setType('transfer')"><span id="tab-ico-trf"></span> Transfer</button>
     </div>
 
     <form onsubmit="submitTx(event)">
-      <div class="field"><label>Amount (₹) *</label><input type="number" id="f-amount" step="0.01" inputmode="decimal" placeholder="0.00" required/></div>
-      <div id="dir-field" class="field" style="display:none"><label>Direction</label><select id="f-dir"><option value="lent">I Lent (They Owe Me)</option><option value="borrowed">I Borrowed (I Owe Them)</option></select></div>
-      <div id="person-field" class="field" style="display:none"><label>Person Name *</label><input type="text" id="f-person" list="people-datalist" placeholder="e.g. Rahul"/><datalist id="people-datalist"></datalist></div>
-      <div style="display:flex;gap:8px">
-        <div class="field" style="flex:1"><label>Account</label><select id="f-acc"></select></div>
-        <div class="field" id="to-acc-field" style="flex:1;display:none"><label>To Account</label><select id="f-to-acc"></select></div>
+      <div class="field">
+        <label>Amount (₹) *</label>
+        <input type="number" id="f-amount" step="0.01" inputmode="decimal" placeholder="0.00" oninput="updateSplitCalc()" required/>
       </div>
-      <div class="field" id="note-field"><label>Merchant / Note</label><input type="text" id="f-note" placeholder="Optional remark..."/></div>
-      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px">Save Entry</button>
+
+      <!-- Split Expense Option -->
+      <div id="split-toggle-wrap" style="margin-bottom:8px">
+        <label class="split-toggle-label">
+          <input type="checkbox" id="f-split-toggle" onchange="toggleSplitBox()"/>
+          <span id="ico-split"></span> Split expense with someone
+        </label>
+        <div id="split-box" class="split-box" style="display:none">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1">
+              <label style="font-size:10px;font-weight:600;color:var(--muted);display:block;margin-bottom:2px">Friend's Name</label>
+              <input type="text" id="f-split-person" list="people-datalist" placeholder="e.g. Rahul"/>
+            </div>
+            <div style="width:120px">
+              <label style="font-size:10px;font-weight:600;color:var(--muted);display:block;margin-bottom:2px">Their Share (₹)</label>
+              <input type="number" id="f-split-amount" step="0.01" inputmode="decimal" placeholder="0.00"/>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px" id="split-hint">You pay total, friend's share is saved as Udhaar lent.</div>
+        </div>
+      </div>
+
+      <!-- Direction (Lent vs Borrowed) -->
+      <div id="dir-field" class="field" style="display:none">
+        <label>Udhaar Direction</label>
+        <select id="f-dir">
+          <option value="lent">I Lent (They owe me money)</option>
+          <option value="borrowed">I Borrowed (I owe them money)</option>
+        </select>
+      </div>
+
+      <!-- Person Name Input -->
+      <div id="person-field" class="field" style="display:none">
+        <label>Person Name *</label>
+        <input type="text" id="f-person" list="people-datalist" placeholder="e.g. Rahul"/>
+        <datalist id="people-datalist"></datalist>
+      </div>
+
+      <!-- Account Selectors -->
+      <div style="display:flex;gap:8px">
+        <div class="field" style="flex:1">
+          <label>Account</label>
+          <select id="f-acc"></select>
+        </div>
+        <div class="field" id="to-acc-field" style="flex:1;display:none">
+          <label>To Account</label>
+          <select id="f-to-acc"></select>
+        </div>
+      </div>
+
+      <!-- Category & Note -->
+      <div style="display:flex;gap:8px" id="cat-note-wrap">
+        <div class="field" style="width:130px" id="cat-field">
+          <label>Category</label>
+          <select id="f-cat">
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Study">Study/Tech</option>
+            <option value="General">General</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1" id="note-field">
+          <label>Merchant / Note</label>
+          <input type="text" id="f-note" placeholder="Optional remark..."/>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;margin-top:4px" id="btn-save-entry">
+        Save Entry
+      </button>
     </form>
   </div>
 
+  <!-- People / Udhaar List -->
   <div class="card">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700">Pending Udhaar</span><span style="font-size:12px;color:var(--muted)" id="people-count">0 pending</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-weight:700;display:flex;align-items:center;gap:6px">
+        <span id="ico-users-title"></span> Pending Udhaar
+      </span>
+      <span style="font-size:12px;color:var(--muted)" id="people-count">0 pending</span>
+    </div>
     <div id="people-list"></div>
   </div>
 
+  <!-- Recent Transactions List (Tap-to-Filter supported) -->
   <div class="card">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-weight:700">Recent Transactions</span></div>
-    <input type="text" id="tx-search" placeholder="🔍 Search entries..." oninput="renderTx()" style="height:34px;margin-bottom:8px"/>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-weight:700">Recent Transactions</span>
+      <span id="active-filter-badge" style="display:none" class="badge badge-filter" onclick="resetActiveFilter()">Clear Filter ✕</span>
+    </div>
+    <div style="position:relative;margin-bottom:8px">
+      <input type="text" id="tx-search" placeholder="Search merchant, category, or note..." oninput="renderTx()" style="height:34px;padding-left:30px"/>
+      <span id="ico-search-input" style="position:absolute;left:8px;top:9px;color:var(--muted);pointer-events:none"></span>
+    </div>
     <div id="tx-list"></div>
   </div>
 </div>
 
 <script>
-let state = { accounts: [], people: [], monthlyExpense: 0, transactions: [] };
+// ── Vector Icon Engine (Strictly No Emojis) ──
+const ICONS = {
+  landmark: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="22" x2="22" y2="22"/><line x1="12" y1="2" x2="20" y2="7"/><line x1="12" y1="2" x2="4" y2="7"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="6" y1="7" x2="6" y2="18"/><line x1="10" y1="7" x2="10" y2="18"/><line x1="14" y1="7" x2="14" y2="18"/><line x1="18" y1="7" x2="18" y2="18"/><polygon points="2 7 12 2 22 7"/></svg>',
+  wallet: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
+  'arrow-up-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
+  'arrow-down-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>',
+  repeat: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+  'check-circle': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  utensils: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"/><path d="M12 2v20"/><path d="M18 11v11"/><path d="M6 2v20"/><path d="M3 2v4a3 3 0 0 0 6 0V2"/></svg>',
+  car: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
+  receipt: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h4"/></svg>',
+  'shopping-bag': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  'book-open': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  layers: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  'trash-2': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  search: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  'chevron-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  'chevron-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  sliders: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  refresh: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  lock: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  split: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+  file: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+  users: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+};
+
+const icon = name => ICONS[name] || '';
+
+// Inject static icons into UI
+document.getElementById('pin-lock-icon').innerHTML = icon('lock');
+document.getElementById('btn-refresh').innerHTML = icon('refresh');
+document.getElementById('btn-sync').innerHTML = icon('file');
+document.getElementById('btn-prev-month').innerHTML = icon('chevron-left');
+document.getElementById('btn-next-month').innerHTML = icon('chevron-right');
+document.getElementById('ico-bank').innerHTML = icon('landmark');
+document.getElementById('ico-edit-bank').innerHTML = icon('sliders');
+document.getElementById('ico-cash').innerHTML = icon('wallet');
+document.getElementById('ico-edit-cash').innerHTML = icon('sliders');
+document.getElementById('ico-spent').innerHTML = icon('arrow-up-right');
+document.getElementById('ico-udhaar').innerHTML = icon('repeat');
+document.getElementById('tab-ico-exp').innerHTML = icon('arrow-up-right');
+document.getElementById('tab-ico-inc').innerHTML = icon('arrow-down-left');
+document.getElementById('tab-ico-udhaar').innerHTML = icon('repeat');
+document.getElementById('tab-ico-trf').innerHTML = icon('repeat');
+document.getElementById('ico-split').innerHTML = icon('split');
+document.getElementById('ico-users-title').innerHTML = icon('users');
+document.getElementById('ico-search-input').innerHTML = icon('search');
+
+// State Variables
+let state = { accounts: [], people: [], monthlyExpense: 0, monthlyBudget: 25000, currentMonth: '', transactions: [] };
 let activeType = 'expense';
+let selectedMonth = new Date().toISOString().slice(0, 7);
+let activeFilter = null; // { type: 'account'|'person', id, name }
+
 const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+// Month Switcher
+function changeMonth(delta) {
+  const [y, m] = selectedMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  selectedMonth = d.toISOString().slice(0, 7);
+  refresh();
+}
+
+function updateMonthDisplay() {
+  const [y, m] = selectedMonth.split('-').map(Number);
+  const d = new Date(y, m - 1, 1);
+  document.getElementById('display-month').textContent = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+}
 
 function setType(t) {
   activeType = t;
   document.querySelectorAll('#type-tabs .tab').forEach((b, i) => b.classList.toggle('active', ['expense','income','gaveTook','transfer'][i] === t));
+  document.getElementById('split-toggle-wrap').style.display = t === 'expense' ? 'block' : 'none';
   document.getElementById('dir-field').style.display = t === 'gaveTook' ? 'block' : 'none';
   document.getElementById('person-field').style.display = t === 'gaveTook' ? 'block' : 'none';
   document.getElementById('to-acc-field').style.display = t === 'transfer' ? 'block' : 'none';
+  document.getElementById('cat-field').style.display = ['expense', 'income'].includes(t) ? 'block' : 'none';
   document.getElementById('note-field').style.display = t === 'transfer' ? 'none' : 'block';
 }
 
+function toggleSplitBox() {
+  const checked = document.getElementById('f-split-toggle').checked;
+  document.getElementById('split-box').style.display = checked ? 'block' : 'none';
+  if (checked) updateSplitCalc();
+}
+
+function updateSplitCalc() {
+  if (!document.getElementById('f-split-toggle').checked) return;
+  const total = parseFloat(document.getElementById('f-amount').value) || 0;
+  const splitInput = document.getElementById('f-split-amount');
+  if (!splitInput.value || parseFloat(splitInput.value) === 0 || parseFloat(splitInput.value) > total) {
+    splitInput.value = (total / 2).toFixed(2);
+  }
+}
+
+// Tap-To-Filter
+function handleTileClick(accId, accName) {
+  if (activeFilter && activeFilter.type === 'account' && activeFilter.id === accId) {
+    resetActiveFilter();
+  } else {
+    activeFilter = { type: 'account', id: accId, name: accName };
+    updateFilterHighlights();
+    renderTx();
+  }
+}
+
+function filterByPerson(personName) {
+  if (activeFilter && activeFilter.type === 'person' && activeFilter.name === personName) {
+    resetActiveFilter();
+  } else {
+    activeFilter = { type: 'person', name: personName };
+    updateFilterHighlights();
+    renderTx();
+  }
+}
+
+function resetActiveFilter() {
+  activeFilter = null;
+  updateFilterHighlights();
+  renderTx();
+}
+
+function updateFilterHighlights() {
+  document.querySelectorAll('.tile').forEach(t => t.classList.remove('active-filter'));
+  const badge = document.getElementById('active-filter-badge');
+  if (!activeFilter) {
+    badge.style.display = 'none';
+    return;
+  }
+  badge.style.display = 'inline-block';
+  if (activeFilter.type === 'account') {
+    badge.textContent = `Filtered: ${activeFilter.name} ✕`;
+    if (activeFilter.id === 1) document.getElementById('tile-bank').classList.add('active-filter');
+    if (activeFilter.id === 2) document.getElementById('tile-cash').classList.add('active-filter');
+  } else {
+    badge.textContent = `Filtered: ${activeFilter.name} ✕`;
+  }
+}
+
 async function refresh() {
+  updateMonthDisplay();
   try {
-    const res = await fetch('/api/state').then(r => r.json());
+    const res = await fetch(`/api/state?month=${selectedMonth}`).then(r => r.json());
     if (res.requiresPin) { document.getElementById('pin-screen').style.display = 'flex'; return; }
     document.getElementById('pin-screen').style.display = 'none';
     state = res;
 
+    // 1. Grid Balances
     const bank = state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0] || { balance: 0 };
     const cash = state.accounts.find(a => /cash/i.test(a.name)) || state.accounts[1] || { balance: 0 };
     document.getElementById('val-bank').textContent = fmt(bank.balance);
     document.getElementById('val-cash').textContent = fmt(cash.balance);
     document.getElementById('val-spent').textContent = fmt(state.monthlyExpense);
 
+    // 2. Monthly Budget Progress Bar
+    const budget = Number(state.monthlyBudget || 25000);
+    document.getElementById('budget-target-label').textContent = `/ ${fmt(budget)}`;
+    const pct = budget > 0 ? Math.min(100, Math.round((state.monthlyExpense / budget) * 100)) : 0;
+    const bar = document.getElementById('budget-bar');
+    bar.style.width = pct + '%';
+    bar.style.background = pct > 100 ? 'var(--red)' : pct >= 80 ? 'var(--amber)' : 'var(--blue)';
+
+    // 3. Udhaar Net
     const udhaarNet = state.people.reduce((s, p) => s + (p.net_balance || 0), 0);
     const uEl = document.getElementById('val-udhaar');
     uEl.textContent = (udhaarNet >= 0 ? '+ ' : '') + fmt(udhaarNet);
     uEl.style.color = udhaarNet >= 0 ? 'var(--green)' : 'var(--red)';
 
+    // 4. Form Selects & Autocomplete
     const optHtml = state.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
     document.getElementById('f-acc').innerHTML = optHtml;
     document.getElementById('f-to-acc').innerHTML = optHtml;
     if (state.accounts[1]) document.getElementById('f-to-acc').value = state.accounts[1].id;
     document.getElementById('people-datalist').innerHTML = state.people.map(p => `<option value="${p.name}"/>`).join('');
 
+    // 5. People / Udhaar List
     document.getElementById('people-count').textContent = `${state.people.length} pending`;
     document.getElementById('people-list').innerHTML = state.people.length ? state.people.map(p => {
       const owes = p.net_balance > 0;
-      return `<div class="row-item">
-        <div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--muted)">${p.phone || 'Contact'}</div></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="badge ${owes ? 'badge-green' : 'badge-red'}">${owes ? 'Owes you ' : 'You owe '}${fmt(Math.abs(p.net_balance))}</span>
-          <button class="btn" style="padding:3px 8px;font-size:11px" onclick="settlePrompt(${p.id}, '${p.name}', ${p.net_balance})">Settle</button>
+      const absBal = Math.abs(p.net_balance);
+      return `<div>
+        <div class="row-item">
+          <div style="cursor:pointer" onclick="filterByPerson('${p.name}')">
+            <div style="font-weight:600">${p.name}</div>
+            <div style="font-size:11px;color:var(--muted)">${p.phone || 'Contact'}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="badge ${owes ? 'badge-green' : 'badge-red'}">${owes ? 'Owes you ' : 'You owe '}${fmt(absBal)}</span>
+            <button class="btn btn-sm" onclick="toggleSettleDrawer(${p.id})">${icon('check-circle')} Settle</button>
+          </div>
+        </div>
+        <!-- Inline Settlement Box -->
+        <div class="settle-drawer" id="settle-box-${p.id}">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">
+            ${owes ? 'Record Payment Received' : 'Record Payment Given'}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <input type="number" id="settle-amt-${p.id}" value="${absBal}" step="0.01" inputmode="decimal" style="height:32px;flex:1"/>
+            <select id="settle-acc-${p.id}" style="height:32px;width:110px">${optHtml}</select>
+            <button class="btn btn-primary btn-sm" style="height:32px" onclick="confirmInlineSettle(${p.id}, ${owes})">${icon('check-circle')} Confirm</button>
+            <button class="btn btn-sm" style="height:32px" onclick="toggleSettleDrawer(${p.id})">${icon('x')}</button>
+          </div>
         </div>
       </div>`;
-    }).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0">No outstanding customer balances 🎉</div>';
+    }).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0">No outstanding customer balances.</div>';
 
     renderTx();
   } catch(e) { console.error(e); }
 }
 
+function toggleSettleDrawer(id) {
+  const box = document.getElementById(`settle-box-${id}`);
+  if (box) box.classList.toggle('open');
+}
+
+async function confirmInlineSettle(personId, isReceive) {
+  const amt = parseFloat(document.getElementById(`settle-amt-${personId}`).value);
+  if (!amt || amt <= 0) return alert('Enter valid settlement amount');
+  const accId = parseInt(document.getElementById(`settle-acc-${personId}`).value);
+
+  await fetch('/api/transactions', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      type: isReceive ? 'settle_in' : 'settle_out',
+      amount: amt,
+      person_id: personId,
+      account_id: accId,
+      note: 'Settled'
+    })
+  });
+  refresh();
+}
+
 function renderTx() {
   const q = (document.getElementById('tx-search').value || '').toLowerCase().trim();
-  const txs = (state.transactions || []).filter(t => !q || (t.merchant||'').toLowerCase().includes(q) || (t.note||'').toLowerCase().includes(q) || (t.person_name||'').toLowerCase().includes(q));
+  let txs = (state.transactions || []);
+
+  // Filter by tapped account or person
+  if (activeFilter) {
+    if (activeFilter.type === 'account') {
+      txs = txs.filter(t => t.account_id === activeFilter.id || t.to_account_id === activeFilter.id);
+    } else if (activeFilter.type === 'person') {
+      txs = txs.filter(t => (t.person_name||'').toLowerCase() === activeFilter.name.toLowerCase());
+    }
+  }
+
+  // Filter by search string
+  if (q) {
+    txs = txs.filter(t => (t.merchant||'').toLowerCase().includes(q) || (t.note||'').toLowerCase().includes(q) || (t.person_name||'').toLowerCase().includes(q) || (t.category||'').toLowerCase().includes(q));
+  }
+
+  const catIconMap = {
+    Food: 'utensils', Travel: 'car', Shopping: 'shopping-bag', Bills: 'receipt', Study: 'book-open', General: 'layers'
+  };
+
   document.getElementById('tx-list').innerHTML = txs.length ? txs.map(t => {
     const isDebit = ['expense','lent','settle_out','transfer'].includes(t.type);
+    const catIco = icon(catIconMap[t.category] || (isDebit ? 'arrow-up-right' : 'arrow-down-left'));
+    const title = t.person_name || t.merchant || t.category || t.type;
     return `<div class="row-item">
-      <div><div style="font-weight:600">${t.person_name || t.merchant || t.category || t.type}</div><div style="font-size:11px;color:var(--muted)">${t.type} · ${t.account_name || 'Account'}</div></div>
-      <div style="display:flex;align-items:center;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="color:var(--muted)">${catIco}</span>
+        <div>
+          <div style="font-weight:600;font-size:13px">${title}</div>
+          <div style="font-size:11px;color:var(--muted)">${t.type} · ${t.account_name || 'Account'}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
         <span class="tx-amt ${isDebit ? 'debit' : 'credit'}">${isDebit ? '-' : '+'}${fmt(t.amount)}</span>
-        <button class="del-btn" onclick="delTx(${t.id})">✕</button>
+        <button class="del-btn" title="Delete" onclick="delTx(${t.id})">${icon('trash-2')}</button>
       </div>
     </div>`;
-  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0">No transactions recorded.</div>';
+  }).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0">No transactions found.</div>';
 }
 
 async function submitTx(e) {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('f-amount').value);
   if (!amount || amount <= 0) return alert('Enter valid amount');
+
   let type = activeType;
   if (type === 'gaveTook') type = document.getElementById('f-dir').value;
 
+  const isSplit = type === 'expense' && document.getElementById('f-split-toggle').checked;
+  const body = {
+    type, amount,
+    account_id: parseInt(document.getElementById('f-acc').value),
+    to_account_id: parseInt(document.getElementById('f-to-acc').value),
+    person_name: document.getElementById('f-person').value.trim(),
+    category: document.getElementById('f-cat').value,
+    note: document.getElementById('f-note').value.trim()
+  };
+
+  if (isSplit) {
+    body.split_person = document.getElementById('f-split-person').value.trim();
+    body.split_amount = parseFloat(document.getElementById('f-split-amount').value) || 0;
+    if (!body.split_person || body.split_amount <= 0) return alert('Enter friend name and valid split amount');
+  }
+
   const res = await fetch('/api/transactions', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      type, amount,
-      account_id: parseInt(document.getElementById('f-acc').value),
-      to_account_id: parseInt(document.getElementById('f-to-acc').value),
-      person_name: document.getElementById('f-person').value.trim(),
-      note: document.getElementById('f-note').value.trim()
-    })
+    body: JSON.stringify(body)
   });
-  if (res.ok) { document.getElementById('f-amount').value = ''; document.getElementById('f-note').value = ''; refresh(); }
-  else { const err = await res.json(); alert(err.error || 'Failed to save'); }
-}
-
-async function settlePrompt(id, name, bal) {
-  const isReceive = bal > 0;
-  const amt = prompt(`Settle ${isReceive ? 'from' : 'to'} ${name} (Max: ₹${Math.abs(bal)}):`, Math.abs(bal));
-  if (!amt || isNaN(amt) || parseFloat(amt) <= 0) return;
-  const defAcc = (state.accounts[0] || {}).id || 1;
-  await fetch('/api/transactions', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ type: isReceive ? 'settle_in' : 'settle_out', amount: parseFloat(amt), person_id: id, account_id: defAcc, note: 'Settled' })
-  });
-  refresh();
+  if (res.ok) {
+    document.getElementById('f-amount').value = '';
+    document.getElementById('f-note').value = '';
+    if (document.getElementById('f-split-toggle').checked) {
+      document.getElementById('f-split-toggle').checked = false;
+      toggleSplitBox();
+    }
+    refresh();
+  } else {
+    const err = await res.json(); alert(err.error || 'Failed to save');
+  }
 }
 
 async function delTx(id) {
@@ -213,6 +599,14 @@ async function editAccount(id) {
   const val = prompt(`Update balance for ${acc.name}:`, acc.balance);
   if (val === null || isNaN(val)) return;
   await fetch(`/api/accounts/${acc.id}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ balance: parseFloat(val) }) });
+  refresh();
+}
+
+async function editBudgetPrompt() {
+  const cur = state.monthlyBudget || 25000;
+  const val = prompt('Set Monthly Budget Target (₹):', cur);
+  if (val === null || isNaN(val) || parseFloat(val) <= 0) return;
+  await fetch('/api/budget', { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ budget: parseFloat(val) }) });
   refresh();
 }
 

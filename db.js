@@ -37,8 +37,14 @@ export async function initDB() {
       created_at TEXT DEFAULT (datetime('now', '+5 hours', '30 minutes'))
     )`,
     `CREATE INDEX IF NOT EXISTS idx_tx_date ON transactions(created_at DESC)`,
-    `CREATE INDEX IF NOT EXISTS idx_tx_utr ON transactions(utr)`
+    `CREATE INDEX IF NOT EXISTS idx_tx_utr ON transactions(utr)`,
+    `CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    )`
   ], 'write');
+
+  await db.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('monthly_budget', '25000')`);
 
   const accs = await db.execute('SELECT COUNT(*) as c FROM accounts');
   if (Number(accs.rows[0].c) === 0) {
