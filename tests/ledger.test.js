@@ -45,7 +45,7 @@ async function resetDB() {
   assert.equal(status, 200);
 }
 
-describe('Udhaar Ledger Tests', () => {
+describe('Udhaar Ledger Comprehensive Tests', () => {
   after(async () => {
     await new Promise(r => server.close(r));
     if (existsSync('test-ledger.db')) await unlink('test-ledger.db').catch(()=>{});
@@ -130,7 +130,7 @@ describe('Udhaar Ledger Tests', () => {
       assert.equal(await getPersonBalance('Suresh'), 0);
     });
 
-    it('A8 — split-expense atomically splits into personal expense and lent debtor entry', async () => {
+    it('A8 — dual split-expense atomically splits into personal expense and lent debtor entry', async () => {
       const { status } = await api('POST', '/api/transactions', {
         type: 'expense', amount: 1000, account_id: UPI_BANK, category: 'Food',
         split_person: 'Rohan', split_amount: 500
@@ -142,12 +142,72 @@ describe('Udhaar Ledger Tests', () => {
       const s = await getState();
       assert.equal(s.monthlyExpense, 500); // Only my 500 share counts toward monthly expense
     });
+
+    it('A9 — multi-person split (e.g. 900 split 3-ways) correctly splits across all participants', async () => {
+      const { status } = await api('POST', '/api/transactions', {
+        type: 'expense', amount: 900, account_id: UPI_BANK, category: 'Food',
+        split_friends: [
+          { name: 'Amit', amount: 300 },
+          { name: 'Neha', amount: 300 }
+        ]
+      });
+      assert.equal(status, 200);
+      assert.equal(await getBalance(UPI_BANK), -900); // 900 deducted from bank
+      assert.equal(await getPersonBalance('Amit'), 300); // Amit owes 300
+      assert.equal(await getPersonBalance('Neha'), 300); // Neha owes 300
+
+      const s = await getState();
+      assert.equal(s.monthlyExpense, 300); // My share is 900 - 600 = 300
+    });
   });
 
-  describe('Group B: Bank SMS Parser & Webhook', () => {
+  describe('Group B: 24-Hour Impulse Cooldown ("Pause Vault")', () => {
     beforeEach(resetDB);
 
-    it('B1 — parses HDFC UPI debit with UTR deduplication', async () => {
+    it('B1 — adds item to cooldown vault', async () => {
+      const { status, body } = await api('POST', '/api/cooldown', { name: 'Headphones', amount: 4500 });
+      assert.equal(status, 200);
+      assert.equal(body.success, true);
+      assert.equal(body.item.name, 'Headphones');
+      assert.equal(body.item.amount, 4500);
+
+      const s = await getState();
+      assert.equal(s.pausedItems.length, 1);
+      assert.equal(s.pausedItems[0].name, 'Headphones');
+    });
+
+    it('B2 — commit converts cooldown item to real expense transaction', async () => {
+      const { body } = await api('POST', '/api/cooldown', { name: 'Smartwatch', amount: 2000 });
+      const itemId = body.item.id;
+
+      const { status } = await api('POST', `/api/cooldown/${itemId}/commit`);
+      assert.equal(status, 200);
+
+      const s = await getState();
+      assert.equal(s.pausedItems.length, 0); // Removed from vault
+      assert.equal(s.monthlyExpense, 2000);  // Converted to expense
+      assert.equal(await getBalance(UPI_BANK), -2000); // Deducted from bank
+    });
+
+    it('B3 — skip removes item from vault and increments saved_by_waiting', async () => {
+      const { body } = await api('POST', '/api/cooldown', { name: 'Designer Shoes', amount: 3500 });
+      const itemId = body.item.id;
+
+      const { status, body: skipBody } = await api('POST', `/api/cooldown/${itemId}/skip`);
+      assert.equal(status, 200);
+      assert.equal(skipBody.savedByWaiting, 3500);
+
+      const s = await getState();
+      assert.equal(s.pausedItems.length, 0); // Removed from vault
+      assert.equal(s.monthlyExpense, 0);     // Zero expense incurred
+      assert.equal(s.savedByWaiting, 3500);  // Saved counter updated
+    });
+  });
+
+  describe('Group C: Bank SMS Parser & Webhook', () => {
+    beforeEach(resetDB);
+
+    it('C1 — parses HDFC UPI debit with UTR deduplication', async () => {
       const sms = 'Dear Customer, Rs 240.00 debited from HDFC Bank A/C ending 1234 to Swiggy on 12-Nov-26 UPI/431712345678.';
       const res1 = await api('POST', '/api/webhook/sms', { sms });
       assert.equal(res1.body.imported, 1);
@@ -158,7 +218,7 @@ describe('Udhaar Ledger Tests', () => {
       assert.equal(await getBalance(UPI_BANK), -240);
     });
 
-    it('B2 — parses SBI credit SMS and ignores OTP', async () => {
+    it('C2 — parses SBI credit SMS and ignores OTP', async () => {
       const batch = `Your A/C 9876 credited by Rs 1,500.00 on 10-Nov-26 by transfer from Boss UPI/431788889999.
 ---
 Your OTP for login is 482910. Do not share with anyone.`;
@@ -169,26 +229,36 @@ Your OTP for login is 482910. Do not share with anyone.`;
     });
   });
 
-  describe('Group C: Security & Health', () => {
-    it('C1 — GET /health returns 200 { ok: true }', async () => {
+  describe('Group D: Security, Health & Liquidity Engine', () => {
+    it('D1 — GET /health returns 200 { ok: true }', async () => {
       const { status, body } = await api('GET', '/health');
       assert.equal(status, 200);
       assert.equal(body.ok, true);
     });
 
-    it('C2 — PUT /api/accounts/:id updates balance directly', async () => {
+    it('D2 — PUT /api/accounts/:id updates balance directly', async () => {
       const { status } = await api('PUT', `/api/accounts/${CASH}`, { balance: 1250 });
       assert.equal(status, 200);
       assert.equal(await getBalance(CASH), 1250);
     });
 
-    it('C3 — PUT /api/budget updates monthly_budget setting and reflects in state', async () => {
+    it('D3 — PUT /api/budget updates monthly_budget setting and reflects in state', async () => {
       const { status, body } = await api('PUT', '/api/budget', { budget: 35000 });
       assert.equal(status, 200);
       assert.equal(body.budget, 35000);
 
       const s = await getState();
       assert.equal(s.monthlyBudget, 35000);
+    });
+
+    it('D4 — 100% zero-emoji enforcement across all source files', async () => {
+      const fs = await import('node:fs');
+      const files = ['public/index.html', 'server.js', 'db.js', 'package.json'];
+      const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/u;
+      for (const file of files) {
+        const content = fs.readFileSync(file, 'utf8');
+        assert.equal(emojiRegex.test(content), false, `Emoji found in ${file}`);
+      }
     });
   });
 });

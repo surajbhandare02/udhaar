@@ -25,6 +25,23 @@ body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 
 .btn-primary { background: var(--navy); color: #fff; border-color: var(--navy); }
 .btn-sm { padding: 4px 8px; font-size: 12px; }
 .btn-danger { background: var(--red-bg); color: var(--red); border-color: #fecaca; }
+.btn-success { background: var(--green-bg); color: var(--green); border-color: #bbf7d0; }
+
+/* Omni-Command Bar */
+.omni-wrap { position: relative; margin-bottom: 12px; }
+.omni-input { width: 100%; height: 42px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0 40px 0 34px; font-size: 14px !important; background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.omni-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+.omni-icon { position: absolute; left: 10px; top: 13px; color: var(--muted); pointer-events: none; }
+.omni-enter-btn { position: absolute; right: 6px; top: 7px; height: 28px; width: 28px; border-radius: 6px; border: 1px solid var(--border); background: #f1f5f9; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.omni-enter-btn:hover { background: #e2e8f0; color: var(--text); }
+.omni-hint { font-size: 11px; color: var(--muted); margin-top: 4px; padding: 0 2px; }
+
+/* Safe to Spend Card */
+.safe-spend-card { background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+.safe-spend-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.safe-spend-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.safe-spend-val { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.safe-spend-sub { font-size: 11px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
 
 /* Month Bar */
 .month-bar { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; }
@@ -41,8 +58,9 @@ body { background: var(--bg); color: var(--text); font-size: 14px; line-height: 
 .tile-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 5px; }
 .tile-val { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 
-/* Budget Bar */
-.budget-bar-wrap { height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-top: 6px; }
+/* Velocity & Budget Bar */
+.burn-readout { font-size: 10px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.budget-bar-wrap { height: 3px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-top: 6px; }
 .budget-progress { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
 
 /* Form Controls */
@@ -57,7 +75,8 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
 .split-box { background: #f8fafc; border: 1px dashed var(--border); border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
 .split-toggle-label { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
 
-/* List Rows */
+/* Monograms & List Rows */
+.monogram { width: 28px; height: 28px; border-radius: 50%; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
 .row-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
 .row-item:last-child { border-bottom: none; }
 .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -69,15 +88,28 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
 .del-btn { border: none; background: transparent; color: var(--muted); cursor: pointer; padding: 4px; display: flex; align-items: center; border-radius: 4px; }
 .del-btn:hover { color: var(--red); background: #fee2e2; }
 
+/* Pause Vault Strip */
+.vault-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+.vault-badge { background: var(--amber-bg); color: var(--amber); border: 1px solid #fde68a; font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+.vault-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.vault-item:last-child { border-bottom: none; }
+
 /* Inline Settle Drawer */
 .settle-drawer { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 10px; margin: 4px 0 8px 0; display: none; }
 .settle-drawer.open { display: block; }
+
+/* Toast */
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--navy); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.toast.show { opacity: 1; }
 
 .pin-gate { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
 .svg-icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 </style>
 </head>
 <body>
+
+<!-- Toast Alert -->
+<div id="toast" class="toast"></div>
 
 <!-- PIN Gate -->
 <div id="pin-screen" class="pin-gate" style="display:none">
@@ -102,11 +134,29 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
     </div>
   </div>
 
+  <!-- Smart Omni-Command Bar (1-Line Natural Language Entry) -->
+  <div class="omni-wrap">
+    <span class="omni-icon" id="omni-icon"></span>
+    <input type="text" id="omni-input" class="omni-input" placeholder="Try: 240 swiggy or 500 gave rahul" onkeydown="handleOmniKey(event)"/>
+    <button type="button" class="omni-enter-btn" title="Run command" onclick="runOmniCommand()" id="omni-enter-btn"></button>
+    <div class="omni-hint">Omni Shorthand: <code>240 swiggy</code> · <code>500 gave rahul</code> · <code>900 split amit neha</code> · <code>2000 bank to cash</code></div>
+  </div>
+
   <!-- Month Navigation Switcher (< Month Year >) -->
   <div class="month-bar">
     <button class="month-btn" onclick="changeMonth(-1)" title="Previous Month" id="btn-prev-month"></button>
     <div class="month-title" id="display-month">Current Month</div>
     <button class="month-btn" onclick="changeMonth(1)" title="Next Month" id="btn-next-month"></button>
+  </div>
+
+  <!-- True Safe-to-Spend Liquidity Engine -->
+  <div class="safe-spend-card">
+    <div class="safe-spend-head">
+      <span class="safe-spend-label"><span id="ico-safe-shield"></span> Safe to Spend</span>
+      <span style="font-size:11px;color:var(--muted)" id="safe-spend-status">Liquid &minus; Owed</span>
+    </div>
+    <div class="safe-spend-val" id="val-safe-spend">₹0.00</div>
+    <div class="safe-spend-sub" id="safe-spend-breakdown">Liquid ₹0.00 &minus; Total I Owe ₹0.00</div>
   </div>
 
   <!-- 2x2 Summary Grid -->
@@ -133,13 +183,14 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
       <div class="tile-val" id="val-cash">₹0.00</div>
     </div>
 
-    <!-- Month Spent + Budget Progress Bar -->
+    <!-- Month Spent + Spending Velocity Predictor -->
     <div class="tile" onclick="editBudgetPrompt()">
       <div class="tile-head">
         <span class="tile-label"><span id="ico-spent"></span> Spent</span>
         <span style="font-size:10px;color:var(--muted);cursor:pointer" id="budget-target-label">/ ₹25,000</span>
       </div>
       <div class="tile-val" style="color:var(--red)" id="val-spent">₹0.00</div>
+      <div class="burn-readout" id="velocity-readout">₹0/day avg · Projected ₹0</div>
       <div class="budget-bar-wrap">
         <div class="budget-progress" id="budget-bar" style="width:0%;background:var(--blue)"></div>
       </div>
@@ -151,6 +202,26 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
         <span class="tile-label"><span id="ico-udhaar"></span> Udhaar Net</span>
       </div>
       <div class="tile-val" id="val-udhaar">₹0.00</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px" id="udhaar-summary-sub">Pending balances</div>
+    </div>
+  </div>
+
+  <!-- 24-Hour Impulse Cooldown ("Pause Vault") -->
+  <div class="card" id="vault-card">
+    <div class="vault-header" onclick="toggleVault()">
+      <span style="font-weight:700;display:flex;align-items:center;gap:6px">
+        <span id="ico-vault-clock"></span> Pause Vault
+        <span id="vault-badge" class="vault-badge">0 paused</span>
+      </span>
+      <span style="font-size:11px;color:var(--muted)" id="vault-saved-label">Saved: ₹0</span>
+    </div>
+    <div id="vault-body" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+      <div style="display:flex;gap:6px;margin-bottom:8px">
+        <input type="text" id="vault-add-name" placeholder="Item name (e.g. Headphones)" style="height:32px;font-size:13px!important;flex:1"/>
+        <input type="number" id="vault-add-amt" placeholder="Amount (₹)" step="0.01" inputmode="decimal" style="height:32px;font-size:13px!important;width:110px"/>
+        <button class="btn btn-primary btn-sm" onclick="addVaultItem()" style="height:32px">Pause</button>
+      </div>
+      <div id="vault-list"></div>
     </div>
   </div>
 
@@ -243,7 +314,7 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
     </form>
   </div>
 
-  <!-- People / Udhaar List -->
+  <!-- People / Udhaar List (Monogram Badges & Tap to Filter) -->
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span style="font-weight:700;display:flex;align-items:center;gap:6px">
@@ -258,7 +329,7 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span style="font-weight:700">Recent Transactions</span>
-      <span id="active-filter-badge" style="display:none" class="badge badge-filter" onclick="resetActiveFilter()">Clear Filter ✕</span>
+      <span id="active-filter-badge" style="display:none" class="badge badge-filter" onclick="resetActiveFilter()">Clear Filter</span>
     </div>
     <div style="position:relative;margin-bottom:8px">
       <input type="text" id="tx-search" placeholder="Search merchant, category, or note..." oninput="renderTx()" style="height:34px;padding-left:30px"/>
@@ -271,28 +342,33 @@ input, select { width: 100%; height: 38px; border: 1px solid var(--border); bord
 <script>
 // ── Vector Icon Engine (Strictly No Emojis) ──
 const ICONS = {
-  landmark: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="22" x2="22" y2="22"/><line x1="12" y1="2" x2="20" y2="7"/><line x1="12" y1="2" x2="4" y2="7"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="6" y1="7" x2="6" y2="18"/><line x1="10" y1="7" x2="10" y2="18"/><line x1="14" y1="7" x2="14" y2="18"/><line x1="18" y1="7" x2="18" y2="18"/><polygon points="2 7 12 2 22 7"/></svg>',
-  wallet: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
-  'arrow-up-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
-  'arrow-down-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>',
-  repeat: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
-  'check-circle': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-  utensils: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"/><path d="M12 2v20"/><path d="M18 11v11"/><path d="M6 2v20"/><path d="M3 2v4a3 3 0 0 0 6 0V2"/></svg>',
-  car: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
-  receipt: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h4"/></svg>',
-  'shopping-bag': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
-  'book-open': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
-  layers: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
-  'trash-2': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
-  search: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-  'chevron-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
-  'chevron-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
-  sliders: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
-  refresh: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
-  lock: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  split: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
-  file: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
-  users: '<svg class="svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+  landmark: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="22" x2="22" y2="22"/><line x1="12" y1="2" x2="20" y2="7"/><line x1="12" y1="2" x2="4" y2="7"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="6" y1="7" x2="6" y2="18"/><line x1="10" y1="7" x2="10" y2="18"/><line x1="14" y1="7" x2="14" y2="18"/><line x1="18" y1="7" x2="18" y2="18"/><polygon points="2 7 12 2 22 7"/></svg>',
+  wallet: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>',
+  'arrow-up-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
+  'arrow-down-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="7" x2="7" y2="17"/><polyline points="17 17 7 17 7 7"/></svg>',
+  repeat: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+  'check-circle': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+  utensils: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2v6a3 3 0 0 1-3 3 3 3 0 0 1-3-3V2"/><path d="M12 2v20"/><path d="M18 11v11"/><path d="M6 2v20"/><path d="M3 2v4a3 3 0 0 0 6 0V2"/></svg>',
+  car: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>',
+  receipt: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 12h8"/><path d="M8 17h4"/></svg>',
+  'shopping-bag': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+  'book-open': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  layers: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+  'trash-2': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>',
+  search: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  'chevron-left': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  'chevron-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  sliders: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  refresh: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>',
+  lock: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  split: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+  file: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+  users: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  shield: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  clock: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  zap: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+  'arrow-right': '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+  x: '<svg class="svg-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
 };
 
 const icon = name => ICONS[name] || '';
@@ -301,14 +377,18 @@ const icon = name => ICONS[name] || '';
 document.getElementById('pin-lock-icon').innerHTML = icon('lock');
 document.getElementById('btn-refresh').innerHTML = icon('refresh');
 document.getElementById('btn-sync').innerHTML = icon('file');
+document.getElementById('omni-icon').innerHTML = icon('zap');
+document.getElementById('omni-enter-btn').innerHTML = icon('arrow-right');
 document.getElementById('btn-prev-month').innerHTML = icon('chevron-left');
 document.getElementById('btn-next-month').innerHTML = icon('chevron-right');
+document.getElementById('ico-safe-shield').innerHTML = icon('shield');
 document.getElementById('ico-bank').innerHTML = icon('landmark');
 document.getElementById('ico-edit-bank').innerHTML = icon('sliders');
 document.getElementById('ico-cash').innerHTML = icon('wallet');
 document.getElementById('ico-edit-cash').innerHTML = icon('sliders');
 document.getElementById('ico-spent').innerHTML = icon('arrow-up-right');
 document.getElementById('ico-udhaar').innerHTML = icon('repeat');
+document.getElementById('ico-vault-clock').innerHTML = icon('clock');
 document.getElementById('tab-ico-exp').innerHTML = icon('arrow-up-right');
 document.getElementById('tab-ico-inc').innerHTML = icon('arrow-down-left');
 document.getElementById('tab-ico-udhaar').innerHTML = icon('repeat');
@@ -318,13 +398,20 @@ document.getElementById('ico-users-title').innerHTML = icon('users');
 document.getElementById('ico-search-input').innerHTML = icon('search');
 
 // State Variables
-let state = { accounts: [], people: [], monthlyExpense: 0, monthlyBudget: 25000, currentMonth: '', transactions: [] };
+let state = { accounts: [], people: [], monthlyExpense: 0, monthlyBudget: 25000, pausedItems: [], savedByWaiting: 0, currentMonth: '', transactions: [] };
 let activeType = 'expense';
 let selectedMonth = new Date().toISOString().slice(0, 7);
 let activeFilter = null; // { type: 'account'|'person', id, name }
 
 const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
 
 // Month Switcher
 function changeMonth(delta) {
@@ -378,7 +465,7 @@ function handleTileClick(accId, accName) {
 }
 
 function filterByPerson(personName) {
-  if (activeFilter && activeFilter.type === 'person' && activeFilter.name === personName) {
+  if (activeFilter && activeFilter.type === 'person' && activeFilter.name.toLowerCase() === personName.toLowerCase()) {
     resetActiveFilter();
   } else {
     activeFilter = { type: 'person', name: personName };
@@ -402,12 +489,237 @@ function updateFilterHighlights() {
   }
   badge.style.display = 'inline-block';
   if (activeFilter.type === 'account') {
-    badge.textContent = `Filtered: ${activeFilter.name} ✕`;
+    badge.textContent = `Filtered: ${activeFilter.name} (Clear)`;
     if (activeFilter.id === 1) document.getElementById('tile-bank').classList.add('active-filter');
     if (activeFilter.id === 2) document.getElementById('tile-cash').classList.add('active-filter');
   } else {
-    badge.textContent = `Filtered: ${activeFilter.name} ✕`;
+    badge.textContent = `Filtered: ${activeFilter.name} (Clear)`;
   }
+}
+
+// ── Smart Omni-Command Parser ──
+function handleOmniKey(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    runOmniCommand();
+  }
+}
+
+async function runOmniCommand() {
+  const input = document.getElementById('omni-input');
+  const str = (input.value || '').trim();
+  if (!str) return;
+
+  // 1. Transfer: "2000 bank to cash" or "500 cash to bank"
+  const trfM = str.match(/^(\d+(?:\.\d+)?)\s+(?:from\s+)?(\w+)\s+to\s+(\w+)$/i);
+  if (trfM) {
+    const amt = parseFloat(trfM[1]);
+    const src = trfM[2].toLowerCase();
+    const dst = trfM[3].toLowerCase();
+    const fromAcc = state.accounts.find(a => a.name.toLowerCase().includes(src)) || state.accounts[0];
+    const toAcc = state.accounts.find(a => a.name.toLowerCase().includes(dst)) || state.accounts[1];
+    if (fromAcc && toAcc && fromAcc.id !== toAcc.id) {
+      const res = await fetch('/api/transactions', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ type: 'transfer', amount: amt, account_id: fromAcc.id, to_account_id: toAcc.id, note: 'Omni Transfer' })
+      });
+      if (res.ok) {
+        input.value = '';
+        showToast(`Transferred ₹${amt} from ${fromAcc.name} to ${toAcc.name}`);
+        refresh();
+        return;
+      }
+    }
+  }
+
+  // 2. Pause Vault: "pause 4500 headphones"
+  const pauseM = str.match(/^(?:pause|cooldown)\s+(\d+(?:\.\d+)?)\s+(.+)$/i);
+  if (pauseM) {
+    const amt = parseFloat(pauseM[1]);
+    const name = pauseM[2].trim();
+    const res = await fetch('/api/cooldown', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, amount: amt })
+    });
+    if (res.ok) {
+      input.value = '';
+      showToast(`Paused ₹${amt} for "${name}" in Cooldown Vault`);
+      refresh();
+      return;
+    }
+  }
+
+  // 3. Multi-Person Split: "900 split amit neha"
+  const splitM = str.match(/^(\d+(?:\.\d+)?)\s+split\s+(.+)$/i);
+  if (splitM) {
+    const total = parseFloat(splitM[1]);
+    const names = splitM[2].split(/\s+/).map(n => n.trim()).filter(Boolean);
+    if (names.length > 0) {
+      const parts = names.length + 1; // Me + friends
+      const eachShare = +(total / parts).toFixed(2);
+      const split_friends = names.map(n => ({ name: n, amount: eachShare }));
+      const defAcc = (state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0])?.id || 1;
+      const res = await fetch('/api/transactions', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          type: 'expense', amount: total, account_id: defAcc, category: 'Food',
+          split_friends, note: `Split between me and ${names.join(', ')}`
+        })
+      });
+      if (res.ok) {
+        input.value = '';
+        showToast(`Split ₹${total} (${parts} ways: ₹${eachShare} each)`);
+        refresh();
+        return;
+      }
+    }
+  }
+
+  // 4. Udhaar Lent: "500 gave rahul" or "500 lent rahul"
+  const lentM = str.match(/^(\d+(?:\.\d+)?)\s+(?:gave|lent|paid)\s+(\w+)$/i);
+  if (lentM) {
+    const amt = parseFloat(lentM[1]);
+    const person = lentM[2].trim();
+    const defAcc = (state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0])?.id || 1;
+    const res = await fetch('/api/transactions', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type: 'lent', amount: amt, account_id: defAcc, person_name: person, note: `Lent to ${person}` })
+    });
+    if (res.ok) {
+      input.value = '';
+      showToast(`Lent ₹${amt} to ${person}`);
+      refresh();
+      return;
+    }
+  }
+
+  // 5. Udhaar Borrowed: "300 took amit" or "300 borrowed amit"
+  const borM = str.match(/^(\d+(?:\.\d+)?)\s+(?:took|borrowed|got)\s+(\w+)$/i);
+  if (borM) {
+    const amt = parseFloat(borM[1]);
+    const person = borM[2].trim();
+    const defAcc = (state.accounts.find(a => /cash/i.test(a.name)) || state.accounts[0])?.id || 1;
+    const res = await fetch('/api/transactions', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type: 'borrowed', amount: amt, account_id: defAcc, person_name: person, note: `Borrowed from ${person}` })
+    });
+    if (res.ok) {
+      input.value = '';
+      showToast(`Borrowed ₹${amt} from ${person}`);
+      refresh();
+      return;
+    }
+  }
+
+  // 6. Expense / Income: "240 swiggy"
+  const expM = str.match(/^(\d+(?:\.\d+)?)\s+(.+)$/i);
+  if (expM) {
+    const amt = parseFloat(expM[1]);
+    const desc = expM[2].trim();
+    let cat = 'General';
+    let type = 'expense';
+    if (/salary|refund|freelance|cashback/i.test(desc)) type = 'income';
+    else if (/swiggy|zomato|chai|tea|coffee|lunch|dinner|food|burger|pizza|biryani|subway|groceries|milk/i.test(desc)) cat = 'Food';
+    else if (/uber|ola|rapido|auto|metro|petrol|fuel|cab|bus|train|flight/i.test(desc)) cat = 'Travel';
+    else if (/amazon|flipkart|myntra|clothes|shirt|shoes|shopping/i.test(desc)) cat = 'Shopping';
+    else if (/electricity|wifi|recharge|bill|gas|water|rent/i.test(desc)) cat = 'Bills';
+    else if (/book|course|udemy|laptop|aws|tech/i.test(desc)) cat = 'Study';
+
+    const defAcc = (state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0])?.id || 1;
+    const res = await fetch('/api/transactions', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type, amount: amt, account_id: defAcc, category: cat, merchant: desc, note: desc })
+    });
+    if (res.ok) {
+      input.value = '';
+      showToast(`Logged ₹${amt} ${type} (${desc})`);
+      refresh();
+      return;
+    }
+  }
+
+  alert('Could not parse command. Examples:\n• 240 swiggy\n• 500 gave rahul\n• 300 took amit\n• 900 split amit neha\n• 2000 bank to cash\n• pause 4500 headphones');
+}
+
+// ── Pause Vault Functions ──
+function toggleVault() {
+  const body = document.getElementById('vault-body');
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+async function addVaultItem() {
+  const name = document.getElementById('vault-add-name').value.trim();
+  const amt = parseFloat(document.getElementById('vault-add-amt').value);
+  if (!name || isNaN(amt) || amt <= 0) return alert('Enter valid name and amount');
+
+  const res = await fetch('/api/cooldown', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, amount: amt })
+  });
+  if (res.ok) {
+    document.getElementById('vault-add-name').value = '';
+    document.getElementById('vault-add-amt').value = '';
+    showToast(`Added ${name} to 24h Cooldown`);
+    refresh();
+  }
+}
+
+async function commitVaultItem(id) {
+  if (!confirm('24h cooldown is over. Proceed with this purchase?')) return;
+  const res = await fetch(`/api/cooldown/${id}/commit`, { method: 'POST' });
+  if (res.ok) {
+    showToast('Purchase committed as expense');
+    refresh();
+  }
+}
+
+async function skipVaultItem(id, amt) {
+  const res = await fetch(`/api/cooldown/${id}/skip`, { method: 'POST' });
+  if (res.ok) {
+    showToast(`Avoided impulse purchase! Saved +${fmt(amt)}`);
+    refresh();
+  }
+}
+
+function renderVault() {
+  const items = state.pausedItems || [];
+  document.getElementById('vault-badge').textContent = `${items.length} paused`;
+  document.getElementById('vault-saved-label').textContent = `Saved: ${fmt(state.savedByWaiting || 0)}`;
+
+  const now = Date.now();
+  const listEl = document.getElementById('vault-list');
+  if (!items.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">No items currently in 24h cooldown vault.</div>';
+    return;
+  }
+
+  listEl.innerHTML = items.map(item => {
+    // 24 hours in ms = 86400000
+    const created = new Date(item.created_at.replace(' ', 'T') + '+05:30').getTime();
+    const elapsed = now - created;
+    const remaining = (24 * 3600 * 1000) - elapsed;
+    const isReady = remaining <= 0;
+
+    let timeText = 'Ready to decide';
+    if (!isReady) {
+      const h = Math.floor(remaining / (3600 * 1000));
+      const m = Math.floor((remaining % (3600 * 1000)) / (60 * 1000));
+      timeText = `${h}h ${m}m remaining`;
+    }
+
+    return `<div class="vault-item">
+      <div>
+        <div style="font-weight:600;font-size:13px">${item.name}</div>
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px">
+          ${icon('clock')} ${timeText} · <span style="font-weight:700;color:var(--text)">${fmt(item.amount)}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-success" onclick="commitVaultItem(${item.id})">Commit</button>
+        <button class="btn btn-sm btn-danger" onclick="skipVaultItem(${item.id}, ${item.amount})">Skip & Save</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function refresh() {
@@ -418,16 +730,37 @@ async function refresh() {
     document.getElementById('pin-screen').style.display = 'none';
     state = res;
 
-    // 1. Grid Balances
+    // 1. Grid Balances & Safe to Spend Engine
     const bank = state.accounts.find(a => /upi|bank/i.test(a.name)) || state.accounts[0] || { balance: 0 };
     const cash = state.accounts.find(a => /cash/i.test(a.name)) || state.accounts[1] || { balance: 0 };
     document.getElementById('val-bank').textContent = fmt(bank.balance);
     document.getElementById('val-cash').textContent = fmt(cash.balance);
     document.getElementById('val-spent').textContent = fmt(state.monthlyExpense);
 
-    // 2. Monthly Budget Progress Bar
+    const liquid = Number(bank.balance || 0) + Number(cash.balance || 0);
+    const owedToOthers = (state.people || [])
+      .filter(p => (p.net_balance || 0) < 0)
+      .reduce((sum, p) => sum + Math.abs(p.net_balance), 0);
+    const safeToSpend = liquid - owedToOthers;
+
+    const safeEl = document.getElementById('val-safe-spend');
+    safeEl.textContent = fmt(safeToSpend);
+    safeEl.style.color = safeToSpend >= 0 ? 'var(--navy)' : 'var(--red)';
+    document.getElementById('safe-spend-breakdown').textContent = `Liquid ${fmt(liquid)} − Total I Owe ${fmt(owedToOthers)}`;
+
+    // 2. Spending Velocity & Month-End Burn Predictor
     const budget = Number(state.monthlyBudget || 25000);
     document.getElementById('budget-target-label').textContent = `/ ${fmt(budget)}`;
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const today = new Date();
+    const isCurrentMonth = selectedMonth === today.toISOString().slice(0, 7);
+    const dayCount = isCurrentMonth ? Math.max(1, today.getDate()) : daysInMonth;
+
+    const dailyAvg = state.monthlyExpense / dayCount;
+    const projected = isCurrentMonth ? (dailyAvg * daysInMonth) : state.monthlyExpense;
+    document.getElementById('velocity-readout').textContent = `₹${Math.round(dailyAvg).toLocaleString('en-IN')}/day avg · Projected ₹${Math.round(projected).toLocaleString('en-IN')}`;
+
     const pct = budget > 0 ? Math.min(100, Math.round((state.monthlyExpense / budget) * 100)) : 0;
     const bar = document.getElementById('budget-bar');
     bar.style.width = pct + '%';
@@ -438,6 +771,7 @@ async function refresh() {
     const uEl = document.getElementById('val-udhaar');
     uEl.textContent = (udhaarNet >= 0 ? '+ ' : '') + fmt(udhaarNet);
     uEl.style.color = udhaarNet >= 0 ? 'var(--green)' : 'var(--red)';
+    document.getElementById('udhaar-summary-sub').textContent = `${state.people.length} active customer${state.people.length === 1 ? '' : 's'}`;
 
     // 4. Form Selects & Autocomplete
     const optHtml = state.accounts.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
@@ -446,16 +780,20 @@ async function refresh() {
     if (state.accounts[1]) document.getElementById('f-to-acc').value = state.accounts[1].id;
     document.getElementById('people-datalist').innerHTML = state.people.map(p => `<option value="${p.name}"/>`).join('');
 
-    // 5. People / Udhaar List
+    // 5. People / Udhaar List with Monogram Badges
     document.getElementById('people-count').textContent = `${state.people.length} pending`;
     document.getElementById('people-list').innerHTML = state.people.length ? state.people.map(p => {
       const owes = p.net_balance > 0;
       const absBal = Math.abs(p.net_balance);
+      const initial = (p.name || '?').trim()[0].toUpperCase();
       return `<div>
         <div class="row-item">
-          <div style="cursor:pointer" onclick="filterByPerson('${p.name}')">
-            <div style="font-weight:600">${p.name}</div>
-            <div style="font-size:11px;color:var(--muted)">${p.phone || 'Contact'}</div>
+          <div style="cursor:pointer;display:flex;align-items:center;gap:10px" onclick="filterByPerson('${p.name}')">
+            <div class="monogram">${initial}</div>
+            <div>
+              <div style="font-weight:600">${p.name}</div>
+              <div style="font-size:11px;color:var(--muted)">${p.phone || 'Pending Ledger'}</div>
+            </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="badge ${owes ? 'badge-green' : 'badge-red'}">${owes ? 'Owes you ' : 'You owe '}${fmt(absBal)}</span>
@@ -477,6 +815,8 @@ async function refresh() {
       </div>`;
     }).join('') : '<div style="color:var(--muted);font-size:12px;padding:8px 0">No outstanding customer balances.</div>';
 
+    // 6. Pause Vault & Transactions
+    renderVault();
     renderTx();
   } catch(e) { console.error(e); }
 }
@@ -581,6 +921,7 @@ async function submitTx(e) {
       document.getElementById('f-split-toggle').checked = false;
       toggleSplitBox();
     }
+    showToast('Transaction saved');
     refresh();
   } else {
     const err = await res.json(); alert(err.error || 'Failed to save');

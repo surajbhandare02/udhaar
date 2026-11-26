@@ -41,10 +41,17 @@ export async function initDB() {
     `CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT
+    )`,
+    `CREATE TABLE IF NOT EXISTS paused_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      created_at TEXT DEFAULT (datetime('now', '+5 hours', '30 minutes'))
     )`
   ], 'write');
 
   await db.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('monthly_budget', '25000')`);
+  await db.execute(`INSERT OR IGNORE INTO settings (key, value) VALUES ('saved_by_waiting', '0')`);
 
   const accs = await db.execute('SELECT COUNT(*) as c FROM accounts');
   if (Number(accs.rows[0].c) === 0) {

@@ -82,7 +82,7 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { error: 'Incorrect PIN' }, 401);
   }
 
-  // 3. State Endpoint with Month Switcher & Budget
+  // 3. State Endpoint with Month Switcher, Budget & Pause Vault
   if (req.method === 'GET' && pathname === '/api/state') {
     if (!isAuthed(req)) return sendJSON(res, { requiresPin: true });
 
@@ -91,7 +91,7 @@ const server = http.createServer(async (req, res) => {
     const startMonth = `${month}-01 00:00:00`;
     const nextMonth = m === 12 ? `${y + 1}-01-01 00:00:00` : `${y}-${String(m + 1).padStart(2, '0')}-01 00:00:00`;
 
-    const [accRes, peoRes, monRes, budRes, txRes] = await db.batch([
+    const [accRes, peoRes, monRes, budRes, txRes, pauseRes, savedRes] = await db.batch([
       `SELECT id, name, balance FROM accounts ORDER BY id ASC`,
       `SELECT id, name, phone, net_balance FROM people WHERE net_balance != 0 ORDER BY ABS(net_balance) DESC`,
       { sql: `SELECT COALESCE(SUM(amount), 0) AS total FROM transactions WHERE type = 'expense' AND created_at >= ? AND created_at < ?`, args: [startMonth, nextMonth] },
@@ -103,9 +103,11 @@ const server = http.createServer(async (req, res) => {
               LEFT JOIN accounts a2 ON t.to_account_id = a2.id
               LEFT JOIN people p ON t.person_id = p.id
               WHERE t.created_at >= ? AND t.created_at < ?
-              ORDER BY t.created_at DESC LIMIT 50`,
+              ORDER BY t.created_at DESC LIMIT 60`,
         args: [startMonth, nextMonth]
-      }
+      },
+      `SELECT id, name, amount, created_at FROM paused_items ORDER BY id DESC`,
+      `SELECT value FROM settings WHERE key = 'saved_by_waiting' LIMIT 1`
     ], 'read');
 
     return sendJSON(res, {
@@ -113,6 +115,8 @@ const server = http.createServer(async (req, res) => {
       people: peoRes.rows,
       monthlyExpense: Number(monRes.rows[0]?.total || 0),
       monthlyBudget: Number(budRes.rows[0]?.value || 25000),
+      pausedItems: pauseRes.rows,
+      savedByWaiting: Number(savedRes.rows[0]?.value || 0),
       currentMonth: month,
       transactions: txRes.rows,
       requiresPin: false
@@ -135,7 +139,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && pathname === '/api/transactions') {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
     const body = await getBody(req);
-    const { type, amount, account_id, to_account_id, note, category, merchant, utr, split_person, split_amount } = body;
+    const { type, amount, account_id, to_account_id, note, category, merchant, utr, split_person, split_amount, split_friends } = body;
     let { person_id, person_name } = body;
     const val = parseFloat(amount);
 
@@ -159,38 +163,53 @@ const server = http.createServer(async (req, res) => {
 
     const stmts = [];
 
-    // Split-Expense Atomic Dual Entry
-    if (type === 'expense' && split_person && parseFloat(split_amount) > 0) {
-      const splitVal = parseFloat(split_amount);
-      const myShare = val - splitVal;
-      if (myShare < 0) return sendJSON(res, { error: 'Split amount cannot exceed total' }, 400);
+    // Split-Expense Atomic Multi-Person or Dual Entry
+    const friends = Array.isArray(split_friends) && split_friends.length > 0
+      ? split_friends
+      : (split_person && parseFloat(split_amount) > 0 ? [{ name: split_person, amount: parseFloat(split_amount) }] : null);
 
-      let splitPersonId;
-      const spRes = await db.execute({ sql: `SELECT id FROM people WHERE name = ? COLLATE NOCASE`, args: [split_person.trim()] });
-      if (spRes.rows.length) {
-        splitPersonId = spRes.rows[0].id;
-      } else {
-        const insSp = await db.execute({ sql: `INSERT INTO people (name, net_balance) VALUES (?, 0) RETURNING id`, args: [split_person.trim()] });
-        splitPersonId = insSp.rows[0].id;
+    if (type === 'expense' && friends && friends.length > 0) {
+      const totalSplitAmt = friends.reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+      const myShare = val - totalSplitAmt;
+      if (myShare < 0) return sendJSON(res, { error: 'Total split shares cannot exceed paid amount' }, 400);
+
+      // Total paid deducted from payer's account
+      stmts.push({ sql: `UPDATE accounts SET balance = balance - ? WHERE id = ?`, args: [val, account_id] });
+
+      // Process each friend
+      for (const friend of friends) {
+        const fAmt = parseFloat(friend.amount) || 0;
+        const fName = (friend.name || '').trim();
+        if (!fName || fAmt <= 0) continue;
+
+        let spId;
+        const spRes = await db.execute({ sql: `SELECT id FROM people WHERE name = ? COLLATE NOCASE`, args: [fName] });
+        if (spRes.rows.length) {
+          spId = spRes.rows[0].id;
+        } else {
+          const insSp = await db.execute({ sql: `INSERT INTO people (name, net_balance) VALUES (?, 0) RETURNING id`, args: [fName] });
+          spId = insSp.rows[0].id;
+        }
+
+        // Friend's debt increases by their share
+        stmts.push({ sql: `UPDATE people SET net_balance = net_balance + ? WHERE id = ?`, args: [fAmt, spId] });
+        // Friend's lent portion record
+        stmts.push({
+          sql: `INSERT INTO transactions (type, amount, account_id, person_id, category, merchant, note) VALUES ('lent', ?, ?, ?, ?, ?, ?)`,
+          args: [fAmt, account_id, spId, category || 'Food', merchant || null, `Split with ${fName}`]
+        });
       }
 
-      // Total paid from account
-      stmts.push({ sql: `UPDATE accounts SET balance = balance - ? WHERE id = ?`, args: [val, account_id] });
-      // Friend's debt increases by splitVal
-      stmts.push({ sql: `UPDATE people SET net_balance = net_balance + ? WHERE id = ?`, args: [splitVal, splitPersonId] });
-      // My expense share
-      stmts.push({
-        sql: `INSERT INTO transactions (type, amount, account_id, category, merchant, note) VALUES ('expense', ?, ?, ?, ?, ?)`,
-        args: [myShare, account_id, category || 'Food', merchant || null, `${note ? note + ' ' : ''}(My share)`]
-      });
-      // Friend's lent portion
-      stmts.push({
-        sql: `INSERT INTO transactions (type, amount, account_id, person_id, category, merchant, note) VALUES ('lent', ?, ?, ?, ?, ?, ?)`,
-        args: [splitVal, account_id, splitPersonId, category || 'Food', merchant || null, `Split with ${split_person.trim()}`]
-      });
+      // My personal expense share record
+      if (myShare > 0) {
+        stmts.push({
+          sql: `INSERT INTO transactions (type, amount, account_id, category, merchant, note) VALUES ('expense', ?, ?, ?, ?, ?)`,
+          args: [myShare, account_id, category || 'Food', merchant || null, `${note ? note + ' ' : ''}(My share)`]
+        });
+      }
 
       await db.batch(stmts, 'write');
-      return sendJSON(res, { success: true });
+      return sendJSON(res, { success: true, myShare, totalSplitAmt });
     }
 
     // Standard transactions
@@ -267,7 +286,64 @@ const server = http.createServer(async (req, res) => {
     return sendJSON(res, { success: true });
   }
 
-  // 8. SMS Webhook
+  // 8. 24-Hour Impulse Cooldown ("Pause Vault") Endpoints
+  if (req.method === 'POST' && pathname === '/api/cooldown') {
+    if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
+    const { name, amount } = await getBody(req);
+    const val = parseFloat(amount);
+    if (!name || isNaN(val) || val <= 0) return sendJSON(res, { error: 'Valid item name and amount required' }, 400);
+
+    const r = await db.execute({
+      sql: `INSERT INTO paused_items (name, amount) VALUES (?, ?) RETURNING id, name, amount, created_at`,
+      args: [name.trim(), val]
+    });
+    return sendJSON(res, { success: true, item: r.rows[0] });
+  }
+
+  const commitMatch = pathname.match(/^\/api\/cooldown\/(\d+)\/commit$/);
+  if (req.method === 'POST' && commitMatch) {
+    if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
+    const itemId = commitMatch[1];
+    const itemRes = await db.execute({ sql: `SELECT * FROM paused_items WHERE id = ?`, args: [itemId] });
+    if (!itemRes.rows.length) return sendJSON(res, { error: 'Cooldown item not found' }, 404);
+
+    const item = itemRes.rows[0];
+    const defAcc = (await db.execute(`SELECT id FROM accounts WHERE name LIKE '%UPI%' OR name LIKE '%Bank%' ORDER BY id ASC LIMIT 1`)).rows[0]?.id || 1;
+
+    await db.batch([
+      { sql: `UPDATE accounts SET balance = balance - ? WHERE id = ?`, args: [item.amount, defAcc] },
+      {
+        sql: `INSERT INTO transactions (type, amount, account_id, category, merchant, note) VALUES ('expense', ?, ?, 'General', ?, 'Committed after 24h cooldown')`,
+        args: [item.amount, defAcc, item.name]
+      },
+      { sql: `DELETE FROM paused_items WHERE id = ?`, args: [itemId] }
+    ], 'write');
+    return sendJSON(res, { success: true });
+  }
+
+  const skipMatch = pathname.match(/^\/api\/cooldown\/(\d+)\/skip$/);
+  if (req.method === 'POST' && skipMatch) {
+    if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
+    const itemId = skipMatch[1];
+    const itemRes = await db.execute({ sql: `SELECT * FROM paused_items WHERE id = ?`, args: [itemId] });
+    if (!itemRes.rows.length) return sendJSON(res, { error: 'Cooldown item not found' }, 404);
+
+    const item = itemRes.rows[0];
+    const savedRes = await db.execute(`SELECT value FROM settings WHERE key = 'saved_by_waiting' LIMIT 1`);
+    const curSaved = parseFloat(savedRes.rows[0]?.value || '0');
+    const newSaved = curSaved + Number(item.amount);
+
+    await db.batch([
+      {
+        sql: `INSERT INTO settings (key, value) VALUES ('saved_by_waiting', ?) ON CONFLICT(key) DO UPDATE SET value = ?`,
+        args: [String(newSaved), String(newSaved)]
+      },
+      { sql: `DELETE FROM paused_items WHERE id = ?`, args: [itemId] }
+    ], 'write');
+    return sendJSON(res, { success: true, savedByWaiting: newSaved });
+  }
+
+  // 9. SMS Webhook
   if (req.method === 'POST' && pathname === '/api/webhook/sms') {
     if (!isAuthed(req)) return sendJSON(res, { error: 'Unauthorized' }, 401);
     const body = await getBody(req);
@@ -316,8 +392,10 @@ const server = http.createServer(async (req, res) => {
       `DELETE FROM transactions`,
       `DELETE FROM people`,
       `DELETE FROM accounts`,
+      `DELETE FROM paused_items`,
       `INSERT INTO accounts (id, name, balance) VALUES (1, 'UPI / Bank', 0), (2, 'Cash', 0), (3, 'Savings', 0)`,
-      `INSERT OR REPLACE INTO settings (key, value) VALUES ('monthly_budget', '25000')`
+      `INSERT OR REPLACE INTO settings (key, value) VALUES ('monthly_budget', '25000')`,
+      `INSERT OR REPLACE INTO settings (key, value) VALUES ('saved_by_waiting', '0')`
     ], 'write');
     return sendJSON(res, { reset: true });
   }
